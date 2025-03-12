@@ -4,7 +4,9 @@ import { useUser } from "../context/userContext";
 import axios from "axios";
 import "../estilos/login.css";
 
+
 function Login() {
+    const [nombre, setNombre] = useState('');
     const [correo, setCorreo] = useState("");
     const [contraseña, setContraseña] = useState("");
     const { setUserId } = useUser();
@@ -29,29 +31,48 @@ function Login() {
                 } else {
                     alert("No se pudo conectar con el servidor.");
                 }
-                return null; 
             }
+            return null; 
         } 
     };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-
         if (!correo || !contraseña) {
             alert("Por favor, completa todos los campos.");
             return;
         }
-
         const data = await loginUsuario();
-        
         if (data && data.token) {
             localStorage.setItem("token", data.token);
             setUserId(data.token);
-            navigate("/dashboard");
+            navigate("/administrador");
         }
-
     };
 
+    const handleSubmitRegistro = async (event) => {
+        event.preventDefault();
+        if (!nombre || !correo || !contraseña) {
+            alert("Todos los campos son obligatorios.");
+            return;
+        }
+        try {
+            const response = await axios.post('http://localhost:5000/api/usuarios/registro', {
+                nombre,
+                email: correo,
+                password: contraseña
+            });
+            alert("Usuario registrado con éxito");
+            setNombre("");
+            setCorreo("");
+            setContraseña("");
+        } catch (error) {
+            console.error("Error al registrar el usuario:", error);
+            alert("Hubo un error al registrar el usuario. Inténtalo de nuevo.");
+        }
+    };
+    
+    
     return (
         <div className="container">
             <div className="forms-container">
@@ -90,30 +111,44 @@ function Login() {
                             <button type="submit">LOGIN</button>
                         </form>
                     ) : (
-                        <form>
+                        <form onSubmit={handleSubmitRegistro}>
                             <h2>REGISTER</h2>
                             <p>Already registered? <a href="#" onClick={() => setIsSignIn(true)}>Sign In</a></p>
+    
                             <div className="input-container">
                                 <label htmlFor="name">Name</label>
-                                <input id="name" type="text" placeholder="Name" />
+                                <input 
+                                    id="name" 
+                                    type="text" 
+                                    placeholder="Name" 
+                                    value={nombre} 
+                                    onChange={(e) => setNombre(e.target.value)} 
+                                />
                             </div>
+
                             <div className="input-container">
                                 <label htmlFor="email">Email</label>
-                                <input id="email" type="email" placeholder="example@gmail.com" />
+                                <input 
+                                    id="email" 
+                                    type="email" 
+                                    placeholder="example@gmail.com" 
+                                    value={correo} 
+                                    onChange={(e) => setCorreo(e.target.value)} 
+                                />
                             </div>
+
                             <div className="input-container">
                                 <label htmlFor="password">Password</label>
-                                <input id="password" type="password" placeholder="Password" />
+                                <input 
+                                    id="password" 
+                                    type="password" 
+                                    placeholder="Password" 
+                                    value={contraseña} 
+                                    onChange={(e) => setContraseña(e.target.value)} 
+                                />
                             </div>
-                            <div className="input-container">
-                                <label htmlFor="verifyPassword">Verify Password</label>
-                                <input id="verifyPassword" type="password" placeholder="Verify Password" />
-                            </div>
-                            <div className="remember-me">
-                                <input type="checkbox" id="checkbox" />
-                                <label htmlFor="checkbox">Remember me</label>
-                            </div>
-                            <button className="btn-register">REGISTER</button>
+
+                            <button className="btn-register" type="submit">REGISTER</button>
                         </form>
                     )}
                 </div>
