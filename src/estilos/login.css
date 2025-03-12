@@ -22,7 +22,7 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 187%;
+    width: 100vw;
     height: 100vh;
     background-color: var(--color-background);
 }
