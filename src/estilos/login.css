@@ -208,3 +208,51 @@ form .btn-register{
     font-size: 0.8rem;
 
 }
+
+table {
+    width: 90%;
+    margin: 20px auto; /* Centrar la tabla y agregar margen */
+    border-collapse: collapse;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border: 1px solid #ddd;
+  }
+  
+  th {
+    background-color: #f4f4f4;
+    font-weight: bold;
+  }
+  
+  tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
+  tr:hover {
+    background-color: #f1f1f1;
+  }
+  
+  button {
+    padding: 8px 12px;
+    margin: 0 5px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    opacity: 0.9;
+  }
+  
+  button:first-of-type {
+    background-color: #4caf50;
+    color: white;
+  }
+  
+  button:last-of-type {
+    background-color: #f44336;
+    color: white;
+  }

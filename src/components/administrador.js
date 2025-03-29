@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "../estilos/login.css";
 import { useNavigate } from "react-router-dom";
+import MenuLateral from "./menulateral"; // Asegúrate de que la ruta sea correcta
+import "../estilos/menu.css";
+
 
 function Administrador() {
   const [usuarios, setUsuarios] = useState([]);
@@ -95,54 +98,76 @@ const navigate = useNavigate();
   if (error) return <div>{error}</div>;
 
   return (
-    <div className="wrapper">
-      <h1>Administradores</h1>
-      
-       
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Nombre</th>
-            <th>Email</th>
-            <th>Rol</th>
-            <th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          {usuarios.map((usuario) => (
-            <tr key={usuario.id}>
-              {editUser && editUser.id === usuario.id ? (
-                <>
-                  <td>{usuario.id}</td>
-                  <td><input type="text" name="nombre" value={editUser.nombre} onChange={handleChange} /></td>
-                  <td><input type="text" name="email" value={editUser.email} onChange={handleChange} /></td>
-                  <td><input type="text" name="rol" value={editUser.rol} onChange={handleChange} /></td>
-                  <td>
-                  <button onClick={() => guardarCambios(usuario.id)}>Guardar</button> 
+    <div style={{ display: "flex" }}>
+      {/* Menú lateral */}
+      <MenuLateral />
 
-                    <button onClick={() => setEditUser(null)}>Cancelar</button>
-                  </td>
-                </>
-              ) : (
-                <>
-                  <td>{usuario.id}</td>
-                  <td>{usuario.nombre}</td>
-                  <td>{usuario.email}</td>
-                  <td>{usuario.rol}</td>
-                  <td>
-                    <button onClick={() => setEditUser(usuario)}>Editar</button>
-                    <button onClick={() => eliminarUsuario(usuario.id)}>Eliminar</button>
-                  </td>
-                </>
-                
-              )}
+      {/* Contenido principal */}
+      <div style={{ marginLeft: "250px", padding: "20px", width: "100%" }}>
+        <h1>Administradores</h1>
+
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Email</th>
+              <th>Rol</th>
+              <th>Acciones</th>
             </tr>
-            
-          ))}
-        </tbody>
-      </table>
-      
+          </thead>
+          <tbody>
+            {usuarios.map((usuario) => (
+              <tr key={usuario.id}>
+                {editUser && editUser.id === usuario.id ? (
+                  <>
+                    <td>{usuario.id}</td>
+                    <td>
+                      <input
+                        type="text"
+                        name="nombre"
+                        value={editUser.nombre}
+                        onChange={handleChange}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="text"
+                        name="email"
+                        value={editUser.email}
+                        onChange={handleChange}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="text"
+                        name="rol"
+                        value={editUser.rol}
+                        onChange={handleChange}
+                      />
+                    </td>
+                    <td>
+                      <button onClick={() => guardarCambios(usuario.id)}>Guardar</button>
+                      <button onClick={() => setEditUser(null)}>Cancelar</button>
+                    </td>
+                  </>
+                ) : (
+                  <>
+                    <td>{usuario.id}</td>
+                    <td>{usuario.nombre}</td>
+                    <td>{usuario.email}</td>
+                    <td>{usuario.rol}</td>
+                    <td>
+                      <button onClick={() => setEditUser(usuario)}>Editar</button>
+                      <button onClick={() => eliminarUsuario(usuario.id)}>Eliminar</button>
+                    </td>
+                  </>
+                )}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
