@@ -4,6 +4,8 @@ import Login from './components/login';
 import Administrador from './components/administrador';
 import { UserProvider } from './context/userContext';
 import Recovery from './components/RecoveryPass';
+import ObrasApp from './components/obras';
+import ZonaTrabajo from './components/zonas';
 
 function App() {
   return (
@@ -13,11 +15,12 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/recovery Password" element={<Recovery />} />
           <Route path="/administrador" element={<Administrador />} />
-          <Route path="*" element={<Login />} />
+          <Route path="/obra" element={<ObrasApp />} />
+          <Route path="/zona" element={<ZonaTrabajo />} />
+          <Route  path="*" element={<Login />} />
+
         </Routes>
       </Router>
     </UserProvider>
   );
 }
-
-export default App;
