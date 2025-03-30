@@ -7,9 +7,11 @@ function MenuLateral() {
     <div className="menu-lateral">
       <h2>Menú</h2>
       <ul>
-        <li><Link to="/administrador">Usuarios</Link></li>
-        <li><Link to="/obra">Obras</Link></li>
-        <li><Link to="/configuracion">Configuración</Link></li>
+        <li><Link to="/administrador">Administradores</Link></li>
+        <li><Link to="/zona">ZonaTrabajo</Link></li>
+        <li><Link to="/obra">obras</Link></li>
+        <li><Link to="/materiales">Materiales</Link></li>
+
       </ul>
     </div>
   );
