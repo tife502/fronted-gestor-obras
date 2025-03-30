@@ -9,10 +9,18 @@ function ObrasApp() {
     fecha_inicio: new Date().toISOString().split("T")[0], // Fecha actual por defecto
     fecha_fin: "" 
   });
+  const [zonas, setZonas] = useState([]);
+  const [trabajadores, setTrabajadores] = useState([]);
+  const [formData, setFormData] = useState({ nombre: "", descripcion: "", obra_id: "", trabajador_id: "" });
   const [editando, setEditando] = useState(null);
+  const [editZonaId, setEditZonaId] = useState(null);
+  const [editZonaData, setEditZonaData] = useState({});
 
   useEffect(() => {
     fetchObras();
+    fetchZonas();
+    fetchTrabajadores();
+
   }, []);
 
   // Obtener la lista de obras
@@ -23,7 +31,8 @@ function ObrasApp() {
     } catch (error) {
       console.error("Error al obtener las obras", error);
     }
-  };
+  } ;
+  
 
   // Crear una nueva obra
   const handleCrear = async () => {
@@ -63,6 +72,66 @@ function ObrasApp() {
     }
   };
 
+  const fetchZonas = async () => {
+    const res = await fetch("http://127.0.0.1:5000/api/zonas/mostrarzonas");
+    const data = await res.json();
+    setZonas(data);
+  };
+
+  const fetchTrabajadores = async () => {
+    const res = await fetch("http://127.0.0.1:5000/api/zonas/trabajadores");
+    const data = await res.json();
+    setTrabajadores(data);
+  };
+
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    await fetch("http://127.0.0.1:5000/api/zonas/crearzonas", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    });
+    fetchZonas();
+  };
+
+  const handleDelete = async (id) => {
+    await fetch(`http://127.0.0.1:5000/api/zonas/eliminarzona/${id}`, { method: "DELETE" });
+    fetchZonas();
+  };
+  const handleEditChange = (e, id) => {
+    setEditZonaData({ ...editZonaData, [id]: { ...editZonaData[id], [e.target.name]: e.target.value } });
+  };
+  const handleEditSubmit = (id) => {
+    axios.put(`http://127.0.0.1:5000/api/zonas/editarzonas/${id}`, editZonaData[id]).then(() => {
+      axios.get("http://127.0.0.1:5000/api/zonas/mostrarzonas").then((response) => setZonas(response.data));
+      setEditZonaId(null);
+    });
+  };
+  const handleCheckOut = (zonaId, trabajadorId) => {
+    axios.post(`http://127.0.0.1:5000/api/zonas/zonatrabajo/${zonaId}/check_out`, { trabajador_id: trabajadorId })
+      .then(() => {
+        axios.get("http://127.0.0.1:5000/api/zonas/mostrarzonas").then((response) => setZonas(response.data));
+      })
+      .catch(error => {
+        console.error("Error al registrar check-out:", error);
+      });
+  };
+
+  const handleCheckIn = (zonaId, trabajadorId) => {
+    axios.post(`http://127.0.0.1:5000/api/zonas/zonatrabajo/${zonaId}/check_in`, { trabajador_id: trabajadorId })
+      .then(() => {
+        axios.get("http://127.0.0.1:5000/api/zonas/mostrarzonas").then((response) => setZonas(response.data));
+      })
+      .catch(error => {
+        console.error("Error al registrar check-in:", error);
+      });
+  };
+
+  
   return (
     <div className="p-4">
         <MenuLateral />
@@ -174,7 +243,89 @@ function ObrasApp() {
           ))}
         </tbody>
       </table>
+      <h1>Zonas de Trabajo</h1>
+      <form onSubmit={handleSubmit}>
+        <input type="text" name="nombre" placeholder="Nombre" onChange={handleChange} required />
+        <input type="text" name="descripcion" placeholder="Descripción" onChange={handleChange} required />
+        <select name="obra_id" onChange={handleChange} required>
+          <option value="">Seleccione una obra</option>
+          {obras.map((obra) => (
+            <option key={obra.id} value={obra.id}>{obra.nombre}</option>
+          ))}
+        </select>
+        <select name="trabajador_id" onChange={handleChange} required>
+          <option value="">Selecciona un Trabajador</option>
+          {trabajadores.map((t) => (
+            <option key={t.id} value={t.id}>{t.nombre}</option>
+          ))}
+        </select>
+        <button type="submit">Crear Zona</button>
+      </form>
+      <table border="1">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Trabajador Asignado</th>
+            <th>Obra</th>
+            <th>Acciones</th>
+            <th>Accio</th>
+            <th>nes</th>
+            
+          </tr>
+        </thead>
+        <tbody>
+          {zonas.map((zona) => (
+            <tr key={zona.id}>
+              {editZonaId === zona.id ? (
+                <>
+                  <td><input type="text" name="nombre" value={editZonaData[zona.id]?.nombre || zona.nombre} onChange={(e) => handleEditChange(e, zona.id)} /></td>
+                  <td><input type="text" name="descripcion" value={editZonaData[zona.id]?.descripcion || zona.descripcion} onChange={(e) => handleEditChange(e, zona.id)} /></td>
+                  <td>
+                    <select name="trabajador_id" value={editZonaData[zona.id]?.trabajador_id || zona.trabajador_id} onChange={(e) => handleEditChange(e, zona.id)}>
+                      {trabajadores.map((trabajador) => (
+                        <option key={trabajador.id} value={trabajador.id}>{trabajador.nombre}</option>
+                      ))}
+                    </select>
+                  </td>
+                  <td>
+                    <select name="obra_id" value={editZonaData[zona.id]?.obra_id || zona.obra_id} onChange={(e) => handleEditChange(e, zona.id)}>
+                      {obras.map((obra) => (
+                        <option key={obra.id} value={obra.id}>{obra.nombre}</option>
+                      ))}
+                    </select>
+                  </td>
+                  <td>
+                    <button onClick={() => handleEditSubmit(zona.id)}>Guardar</button>
+                    <button onClick={() => setEditZonaId(null)}>Cancelar</button>
+                  </td>
+                </>
+              ) : (
+                <>
+                  <td>{zona.nombre}</td>
+                  <td>{zona.descripcion}</td>
+                  <td>{trabajadores.find(t => t.id === zona.trabajador_id)?.nombre || "N/A"}</td>
+                  <td>{obras.find(o => o.id === zona.obra_id)?.nombre || "N/A"}</td>
+                  <td>{zona.check_in ? new Date(zona.check_in).toLocaleString() : "Pendiente"}</td>
+              <td>{zona.check_out ? new Date(zona.check_out).toLocaleString() : "Pendiente"}</td>
+              <td>
+                <button onClick={() => setEditZonaId(zona.id)}>Editar</button>
+                <button onClick={() => handleDelete(zona.id)}>Eliminar</button>
+                {!zona.check_in && (
+                  <button onClick={() => handleCheckIn(zona.id, zona.trabajador_id)}>Registrar Entrada</button>
+                )}
+                {zona.check_in && !zona.check_out && (
+                  <button onClick={() => handleCheckOut(zona.id, zona.trabajador_id)}>Registrar Salida</button>
+                )}
+              </td>
+                </>
+              )}
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
+    
   );
 }
 
