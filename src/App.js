@@ -5,6 +5,8 @@ import Administrador from './components/administrador';
 import { UserProvider } from './context/userContext';
 import Recovery from './components/RecoveryPass';
 import ObrasApp from './components/obras';
+import Materiales from './components/materiales';
+
 
 function App() {
   return (
@@ -15,11 +17,14 @@ function App() {
           <Route path="/recovery Password" element={<Recovery />} />
           <Route path="/administrador" element={<Administrador />} />
           <Route path="/obra" element={<ObrasApp />} />
-          <Route  path="*" element={<Login />} />
+          <Route  path="/materiales" element={<Materiales />} />
+
         </Routes>
       </Router>
     </UserProvider>
   );
 }
+
+export default App;
 
 export default App;
