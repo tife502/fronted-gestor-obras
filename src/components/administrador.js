@@ -2,15 +2,17 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import "../estilos/login.css";
 import { useNavigate } from "react-router-dom";
-import MenuLateral from "./menulateral"; // Asegúrate de que la ruta sea correcta
-import "../estilos/menu.css";
+import MenuLateral from "./menulateral"; 
+import "../estilos/admi.css";
+
 
 
 function Administrador() {
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [editUser, setEditUser] = useState(null); // Usuario en edición
+  const [editUser, setEditUser] = useState(null); // Usuario en 
+  const [menuExpanded, setMenuExpanded] = useState(true);
 
   // Cargar usuarios desde la API
   useEffect(() => {
@@ -51,7 +53,7 @@ function Administrador() {
         return;
     }
 
-    console.log("📡 Enviando solicitud con datos:", editUser);
+    console.log("Enviando solicitud con datos:", editUser);
 
     try {
         const response = await fetch(`http://127.0.0.1:5000/api/usuarios/modificarusuario/${id}`, {
@@ -98,18 +100,20 @@ const navigate = useNavigate();
   if (error) return <div>{error}</div>;
 
   return (
-    <div style={{ display: "flex" }}>
+    <MenuLateral>
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "100%" }}>
       {/* Menú lateral */}
-      <MenuLateral />
+      
 
       {/* Contenido principal */}
-      <div style={{ marginLeft: "250px", padding: "20px", width: "100%" }}>
-        <h1>Administradores</h1>
+      <h1>Administradores</h1>
+      <div className="table-wrapper">
+      <div className="table-container">
+        
 
         <table>
           <thead>
             <tr>
-              <th>ID</th>
               <th>Nombre</th>
               <th>Email</th>
               <th>Rol</th>
@@ -153,7 +157,6 @@ const navigate = useNavigate();
                   </>
                 ) : (
                   <>
-                    <td>{usuario.id}</td>
                     <td>{usuario.nombre}</td>
                     <td>{usuario.email}</td>
                     <td>{usuario.rol}</td>
@@ -168,9 +171,10 @@ const navigate = useNavigate();
           </tbody>
         </table>
       </div>
+      </div>
     </div>
+    </MenuLateral>
   );
 }
 
 export default Administrador;
-
