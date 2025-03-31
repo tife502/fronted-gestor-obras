@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import axios from "axios";
 import MenuLateral from "./menulateral";
+import "../estilos/obras.css"; 
+
 function ObrasApp() {
   const [obras, setObras] = useState([]);
   const [nuevaObra, setNuevaObra] = useState({ 
@@ -130,53 +132,52 @@ function ObrasApp() {
         console.error("Error al registrar check-in:", error);
       });
   };
-
   
   return (
-    <div className="p-4">
-        <MenuLateral />
-      <h1 className="text-xl font-bold mb-4">Gestión de Obras</h1>
-
+    <MenuLateral>
+    <div className="contenedor">
+  
+        
       {/* Formulario para agregar una nueva obra */}
-      <div className="mb-4 flex gap-2">
+      
+      <div className="form-container">
+      <div> <h2>Gestión de Obras</h2> </div>
         <input
-          className="border p-2 rounded w-1/4"
           placeholder="Nombre"
           value={nuevaObra.nombre}
           onChange={(e) => setNuevaObra({ ...nuevaObra, nombre: e.target.value })}
         />
         <input
-          className="border p-2 rounded w-1/4"
           placeholder="Descripción"
           value={nuevaObra.descripcion}
           onChange={(e) => setNuevaObra({ ...nuevaObra, descripcion: e.target.value })}
         />
         <input
           type="date"
-          className="border p-2 rounded w-1/6"
           value={nuevaObra.fecha_inicio}
           onChange={(e) => setNuevaObra({ ...nuevaObra, fecha_inicio: e.target.value })}
         />
         <input
           type="date"
-          className="border p-2 rounded w-1/6"
           value={nuevaObra.fecha_fin}
           onChange={(e) => setNuevaObra({ ...nuevaObra, fecha_fin: e.target.value })}
         />
-        <button className="bg-blue-500 text-white p-2 rounded" onClick={handleCrear}>
+        <button onClick={handleCrear}>
           Crear Obra
         </button>
       </div>
-
+      
       {/* Tabla de obras */}
+      <div className="table-container">
+      <div className="table-wrapper">
       <table className="w-full border-collapse border border-gray-300">
         <thead>
-          <tr className="bg-gray-200">
-            <th className="border p-2">Nombre</th>
-            <th className="border p-2">Descripción</th>
-            <th className="border p-2">Fecha Inicio</th>
-            <th className="border p-2">Fecha Fin</th>
-            <th className="border p-2">Acciones</th>
+          <tr>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Fecha Inicio</th>
+            <th>Fecha Fin</th>
+            <th>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -184,56 +185,56 @@ function ObrasApp() {
             <tr key={obra.id} className="border">
               {editando?.id === obra.id ? (
                 <>
-                  <td className="border p-2">
+                  <td>
                     <input
-                      className="border p-2 w-full"
+                      type="text"
+                      name="nombre"
                       value={editando.nombre}
                       onChange={(e) => setEditando({ ...editando, nombre: e.target.value })}
                     />
                   </td>
-                  <td className="border p-2">
+                  <td>
                     <input
-                      className="border p-2 w-full"
+                      type="text"
+                        name="descripcion"
                       value={editando.descripcion}
                       onChange={(e) => setEditando({ ...editando, descripcion: e.target.value })}
                     />
                   </td>
-                  <td className="border p-2">
+                  <td>
                     <input
                       type="date"
-                      className="border p-2 w-full"
                       value={editando.fecha_inicio}
                       onChange={(e) => setEditando({ ...editando, fecha_inicio: e.target.value })}
                     />
                   </td>
-                  <td className="border p-2">
+                  <td>
                     <input
                       type="date"
-                      className="border p-2 w-full"
                       value={editando.fecha_fin}
                       onChange={(e) => setEditando({ ...editando, fecha_fin: e.target.value })}
                     />
                   </td>
-                  <td className="border p-2">
-                    <button className="bg-green-500 text-white p-1 rounded mr-2" onClick={() => handleEditar(obra.id)}>
+                  <td>
+                    <button  onClick={() => handleEditar(obra.id)}>
                       Guardar
                     </button>
-                    <button className="bg-gray-500 text-white p-1 rounded" onClick={() => setEditando(null)}>
+                    <button  onClick={() => setEditando(null)}>
                       Cancelar
                     </button>
                   </td>
                 </>
               ) : (
                 <>
-                  <td className="border p-2">{obra.nombre}</td>
-                  <td className="border p-2">{obra.descripcion}</td>
-                  <td className="border p-2">{obra.fecha_inicio}</td>
-                  <td className="border p-2">{obra.fecha_fin || "No definida"}</td>
-                  <td className="border p-2">
-                    <button className="bg-yellow-500 text-white p-1 rounded mr-2" onClick={() => setEditando(obra)}>
+                  <td>{obra.nombre}</td>
+                  <td>{obra.descripcion}</td>
+                  <td>{obra.fecha_inicio}</td>
+                  <td>{obra.fecha_fin || "No definida"}</td>
+                  <td>
+                    <button onClick={() => setEditando(obra)}>
                       Editar
                     </button>
-                    <button className="bg-red-500 text-white p-1 rounded" onClick={() => handleEliminar(obra.id)}>
+                    <button onClick={() => handleEliminar(obra.id)}>
                       Eliminar
                     </button>
                   </td>
@@ -243,8 +244,13 @@ function ObrasApp() {
           ))}
         </tbody>
       </table>
-      <h1>Zonas de Trabajo</h1>
+      </div>
+      </div>
+      
+      <div className="form-container">
+      <div><h2>Zonas de Trabajo</h2></div> 
       <form onSubmit={handleSubmit}>
+      
         <input type="text" name="nombre" placeholder="Nombre" onChange={handleChange} required />
         <input type="text" name="descripcion" placeholder="Descripción" onChange={handleChange} required />
         <select name="obra_id" onChange={handleChange} required>
@@ -261,72 +267,120 @@ function ObrasApp() {
         </select>
         <button type="submit">Crear Zona</button>
       </form>
-      <table border="1">
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Descripción</th>
-            <th>Trabajador Asignado</th>
-            <th>Obra</th>
-            <th>Acciones</th>
-            <th>Accio</th>
-            <th>nes</th>
-            
-          </tr>
-        </thead>
-        <tbody>
-          {zonas.map((zona) => (
-            <tr key={zona.id}>
-              {editZonaId === zona.id ? (
-                <>
-                  <td><input type="text" name="nombre" value={editZonaData[zona.id]?.nombre || zona.nombre} onChange={(e) => handleEditChange(e, zona.id)} /></td>
-                  <td><input type="text" name="descripcion" value={editZonaData[zona.id]?.descripcion || zona.descripcion} onChange={(e) => handleEditChange(e, zona.id)} /></td>
-                  <td>
-                    <select name="trabajador_id" value={editZonaData[zona.id]?.trabajador_id || zona.trabajador_id} onChange={(e) => handleEditChange(e, zona.id)}>
-                      {trabajadores.map((trabajador) => (
-                        <option key={trabajador.id} value={trabajador.id}>{trabajador.nombre}</option>
-                      ))}
-                    </select>
-                  </td>
-                  <td>
-                    <select name="obra_id" value={editZonaData[zona.id]?.obra_id || zona.obra_id} onChange={(e) => handleEditChange(e, zona.id)}>
-                      {obras.map((obra) => (
-                        <option key={obra.id} value={obra.id}>{obra.nombre}</option>
-                      ))}
-                    </select>
-                  </td>
-                  <td>
-                    <button onClick={() => handleEditSubmit(zona.id)}>Guardar</button>
-                    <button onClick={() => setEditZonaId(null)}>Cancelar</button>
-                  </td>
-                </>
-              ) : (
-                <>
-                  <td>{zona.nombre}</td>
-                  <td>{zona.descripcion}</td>
-                  <td>{trabajadores.find(t => t.id === zona.trabajador_id)?.nombre || "N/A"}</td>
-                  <td>{obras.find(o => o.id === zona.obra_id)?.nombre || "N/A"}</td>
-                  <td>{zona.check_in ? new Date(zona.check_in).toLocaleString() : "Pendiente"}</td>
-              <td>{zona.check_out ? new Date(zona.check_out).toLocaleString() : "Pendiente"}</td>
-              <td>
-                <button onClick={() => setEditZonaId(zona.id)}>Editar</button>
-                <button onClick={() => handleDelete(zona.id)}>Eliminar</button>
-                {!zona.check_in && (
-                  <button onClick={() => handleCheckIn(zona.id, zona.trabajador_id)}>Registrar Entrada</button>
-                )}
-                {zona.check_in && !zona.check_out && (
-                  <button onClick={() => handleCheckOut(zona.id, zona.trabajador_id)}>Registrar Salida</button>
-                )}
-              </td>
-                </>
-              )}
-            </tr>
-          ))}
-        </tbody>
-      </table>
     </div>
+    <div className="table-container">
+      <div className="table-wrapper">
+      <table>
+  <thead>
+    <tr>
+      <th>Nombre</th>
+      <th>Descripción</th>
+      <th>Trabajador</th>
+      <th>Obra</th>
+      <th>Check-In</th>
+      <th>Check-Out</th>
+      <th>Editar</th>
+      <th>Eliminar</th>
+      <th>Entrada</th>
+      <th>Salida</th>
+    </tr>
+  </thead>
+  <tbody>
+    {zonas.map((zona) => (
+      <tr key={zona.id}>
+        {editZonaId === zona.id ? (
+          <>
+            <td>
+              <input type="text" name="nombre" 
+                value={editZonaData[zona.id]?.nombre || zona.nombre} 
+                onChange={(e) => handleEditChange(e, zona.id)} 
+              />
+            </td>
+            <td>
+              <input type="text" name="descripcion" 
+                value={editZonaData[zona.id]?.descripcion || zona.descripcion} 
+                onChange={(e) => handleEditChange(e, zona.id)} 
+              />
+            </td>
+            <td>
+              <select name="trabajador_id" 
+                value={editZonaData[zona.id]?.trabajador_id || zona.trabajador_id} 
+                onChange={(e) => handleEditChange(e, zona.id)}
+              >
+                {trabajadores.map((trabajador) => (
+                  <option key={trabajador.id} value={trabajador.id}>
+                    {trabajador.nombre}
+                  </option>
+                ))}
+              </select>
+            </td>
+            <td>
+              <select name="obra_id" 
+                value={editZonaData[zona.id]?.obra_id || zona.obra_id} 
+                onChange={(e) => handleEditChange(e, zona.id)}
+              >
+                {obras.map((obra) => (
+                  <option key={obra.id} value={obra.id}>
+                    {obra.nombre}
+                  </option>
+                ))}
+              </select>
+            </td>
+            <td colSpan="2">
+              <button onClick={() => handleEditSubmit(zona.id)}>Guardar</button>
+              <button onClick={() => setEditZonaId(null)}>Cancelar</button>
+            </td>
+            <td colSpan="3"></td>
+          </>
+        ) : (
+          <>
+            <td>{zona.nombre}</td>
+            <td>{zona.descripcion}</td>
+            <td>{trabajadores.find(t => t.id === zona.trabajador_id)?.nombre || "N/A"}</td>
+            <td>{obras.find(o => o.id === zona.obra_id)?.nombre || "N/A"}</td>
+            <td>{zona.check_in ? new Date(zona.check_in).toLocaleString() : "Pendiente"}</td>
+            <td>{zona.check_out ? new Date(zona.check_out).toLocaleString() : "Pendiente"}</td>
+            <td>
+              <button onClick={() => setEditZonaId(zona.id)}>Editar</button>
+            </td>
+            <td>
+              <button onClick={() => handleDelete(zona.id)}>Eliminar</button>
+            </td>
+            <td>
+              {zona.check_in ? (
+                <span>✔</span>
+              ) : (
+                <button className="registrar" onClick={() => handleCheckIn(zona.id, zona.trabajador_id)}>
+                  Registrar
+                </button>
+              )}
+            </td>
+            <td>
+              {zona.check_in && !zona.check_out ? (
+                <button onClick={() => handleCheckOut(zona.id, zona.trabajador_id)}>
+                  Registrar
+                </button>
+              ) : zona.check_out ? (
+                <span>✔</span>
+              ) : (
+                ""
+              )}
+            </td>
+          </>
+        )}
+      </tr>
+    ))}
+  </tbody>
+</table>
+</div>
+</div>
+</div>
+</MenuLateral>
+
+    
     
   );
 }
 
 export default ObrasApp;
+
