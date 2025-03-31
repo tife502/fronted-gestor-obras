@@ -1,18 +1,29 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import "../estilos/menu.css";
 
-function MenuLateral() {
-  return (
-    <div className="menu-lateral">
-      <h2>Menú</h2>
-      <ul>
-        <li><Link to="/administrador">Administradores</Link></li>
-        <li><Link to="/zona">ZonaTrabajo</Link></li>
-        <li><Link to="/obra">obras</Link></li>
-        <li><Link to="/materiales">Materiales</Link></li>
+function MenuLateral({ children }) {
+  const [menuVisible, setMenuVisible] = useState(false);
 
-      </ul>
+  const toggleMenu = () => {
+    setMenuVisible(!menuVisible);
+  };
+
+  return (
+    <div className={`contenedor-principal ${menuVisible ? "expandido" : ""}`}>
+      <div className={`menu-lateral ${menuVisible ? "visible" : "hidden"}`}>
+        <button onClick={toggleMenu} className="menu-toggle">☰</button>
+        <div className="menu-content">
+          <ul>
+            <li><Link to="/administrador">Administradores</Link></li>
+            <li><Link to="/obra">Obras</Link></li>
+            <li><Link to="/materiales">Materiales</Link></li>
+          </ul>
+        </div>
+      </div>
+      <div className={`contenido ${menuVisible ? "mover-derecha" : ""}`}>
+        {children}
+      </div>
     </div>
   );
 }
