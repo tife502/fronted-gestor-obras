@@ -39,7 +39,7 @@ const Materiales = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    axios.post("http://127.0.0.1:5000/api/materiales/materiales", nuevoMaterial)
+    axios.post("http://127.0.0.1:5000/api/materiales/crearmateriales", nuevoMaterial)
       .then(() => {
         obtenerMateriales();
         setNuevoMaterial({ nombre: "", cantidad_disponible: 0 });

@@ -49,7 +49,13 @@ function ObrasApp() {
       setObras([...obras, response.data]);
       setNuevaObra({ nombre: "", descripcion: "", fecha_inicio: new Date().toISOString().split("T")[0], fecha_fin: "" });
     } catch (error) {
-      console.error("Error al crear la obra", error);
+      if (error.response && error.response.status === 400) {
+        // Captura el error 400 y muestra un mensaje de alerta
+        alert("Fecha inválida. Por favor, verifica las fechas ingresadas.");
+      } else {
+        console.error("Error al crear la obra", error);
+        alert("Ocurrió un error al crear la obra. Inténtalo nuevamente.");
+      }
     }
   };
 
