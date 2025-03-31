@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import MenuLateral from "./menulateral";
+import "../estilos/obras.css"; 
+
 
 const Materiales = () => {
   const [materiales, setMateriales] = useState([]);
@@ -18,7 +20,7 @@ const Materiales = () => {
   useEffect(() => {
     obtenerMateriales();
     obtenerSolicitudes();
-    obtenerTrabajadores();
+   
   }, []);
 
   const obtenerMateriales = () => {
@@ -63,16 +65,42 @@ const Materiales = () => {
   };
 
 
-  const obtenerTrabajadores = () => {
+  useEffect(() => {
     axios.get("http://127.0.0.1:5000/api/materiales/trabajadores")
       .then(response => setTrabajadores(response.data))
       .catch(error => console.error("Error al obtener trabajadores:", error));
+  }, []);
+
+  // Obtener materiales
+  useEffect(() => {
+    axios.get("http://127.0.0.1:5000/api/materiales/materiales")
+      .then(response => setMateriales(response.data))
+      .catch(error => console.error("Error al obtener materiales:", error));
+  }, []);
+
+  // Obtener solicitudes
+  const obtenerSolicitudes = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/materiales/mostrarsolicitudes");
+      const data = await response.json();
+      console.log("Solicitudes obtenidas:", data); // Debugging
+      setSolicitudes(data);
+    } catch (error) {
+      console.error("Error obteniendo solicitudes:", error);
+    }
   };
 
+  // Obtener solicitudes al cargar el componente
+  useEffect(() => {
+    obtenerSolicitudes();
+  }, []);
+
+  // Manejar cambios en el formulario
   const handleChangeS = (e) => {
     setNuevaSolicitud({ ...nuevaSolicitud, [e.target.name]: e.target.value });
   };
 
+  // Enviar solicitud
   const handleSubmitS = (e) => {
     e.preventDefault();
     const materialSeleccionado = materiales.find(m => m.nombre === nuevaSolicitud.material);
@@ -83,42 +111,35 @@ const Materiales = () => {
     }
 
     axios.post("http://127.0.0.1:5000/api/materiales/materiales/solicitudes", {
-      trabajador_id: trabajadores.find(t => t.nombre === nuevaSolicitud.trabajador).id,
+      trabajador_id: trabajadores.find(t => t.nombre === nuevaSolicitud.trabajador)?.id,
       material_id: materialSeleccionado.id,
       cantidad: nuevaSolicitud.cantidad,
     })
     .then(() => {
-      obtenerSolicitudes();
+      obtenerSolicitudes(); // 🔄 Actualiza la tabla después de enviar
       setNuevaSolicitud({ trabajador: "", material: "", cantidad: 0 });
     })
     .catch(error => console.error("Error al crear solicitud:", error));
   };
 
-  const obtenerSolicitudes = async () => {
-    try {
-      const response = await fetch("http://localhost:5000/api/materiales/mostrarsolicitudes");
-      const data = await response.json();
-      console.log("Solicitudes obtenidas:", data); // 👀 Verifica si llegan datos
-      setSolicitudes(data);
-    } catch (error) {
-      console.error("Error obteniendo solicitudes:", error);
-    }
-  };
-
   return (
-    <div>
-        <MenuLateral />
+    <MenuLateral>
+    <div className="contenedor">
+      <div className="form-container">
       <h2>Gestión de Materiales</h2>
 
       {/* Formulario para agregar material */}
+      <div className="form-container">
       <h3>Agregar Nuevo Material</h3>
       <form onSubmit={handleSubmit}>
         <input type="text" name="nombre" placeholder="Nombre" value={nuevoMaterial.nombre} onChange={handleChange} required />
         <input type="number" name="cantidad_disponible" placeholder="Cantidad" value={nuevoMaterial.cantidad_disponible} onChange={handleChange} required />
         <button type="submit">Agregar Material</button>
       </form>
-
+      </div>
       {/* Tabla de materiales */}
+      <div className="table-container">
+      <div className="table-wrapper">
       <h3>Lista de Materiales</h3>
       <table border="1">
         <thead>
@@ -169,10 +190,14 @@ const Materiales = () => {
           ))}
         </tbody>
       </table>
+      </div> </div>
       <div>
+
+
       <h2>Gestión de Solicitudes de Material</h2>
 
       {/* Formulario para nueva solicitud */}
+      <div className="form-container">
       <h3>Crear Nueva Solicitud</h3>
       <form onSubmit={handleSubmitS}>
         <select name="trabajador" value={nuevaSolicitud.trabajador} onChange={handleChangeS} required>
@@ -192,7 +217,10 @@ const Materiales = () => {
         <input type="number" name="cantidad" placeholder="Cantidad" value={nuevaSolicitud.cantidad} onChange={handleChangeS} required />
         <button type="submit">Solicitar Material</button>
       </form>
-
+      </div>
+      
+      <div className="table-container">
+      <div className="table-wrapper">
       {/* Tabla de solicitudes */}
       <h3>Solicitudes Registradas</h3>
       <table border="1">
@@ -205,21 +233,29 @@ const Materiales = () => {
           </tr>
         </thead>
         <tbody>
-        
-          {solicitudes.map((solicitud) => (
-            <tr key={solicitud.id}>
-              <td>{trabajadores.find(t => t.id === solicitud.trabajador_id)?.nombre || "Desconocido"}</td>
-              <td>{materiales.find(m => m.id === solicitud.material_id)?.nombre || "Desconocido"}</td>
-              <td>{solicitud.cantidad}</td>
-              <td>{solicitud.estado}</td>
-            </tr>
-          ))}
+          {solicitudes.length === 0 ? (
+            <tr><td colSpan="4">No hay solicitudes registradas</td></tr>
+          ) : (
+            solicitudes.map((solicitud) => (
+              <tr key={solicitud.id}>
+                <td>{trabajadores.find(t => t.id === solicitud.trabajador_id)?.nombre || "Desconocido"}</td>
+                <td>{materiales.find(m => m.id === solicitud.material_id)?.nombre || "Desconocido"}</td>
+                <td>{solicitud.cantidad}</td>
+                <td>{solicitud.estado}</td>
+              </tr>
+            ))
+          )}
         </tbody>
       </table>
+      </div>
+      </div>
     </div>
     </div>
+    </div>
+    </MenuLateral>
     
   );
 };
 
 export default Materiales;
+
