@@ -4,9 +4,9 @@ import Login from './components/login';
 import Administrador from './components/administrador';
 import { UserProvider } from './context/userContext';
 import Recovery from './components/RecoveryPass';
-import ObrasApp from './components/obras';
-import Materiales from './components/materiales';
 
+import Materiales from './components/materiales';
+import Zonas from './components/zonas';
 
 function App() {
   return (
@@ -16,8 +16,9 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/recovery Password" element={<Recovery />} />
           <Route path="/administrador" element={<Administrador />} />
-          <Route path="/obra" element={<ObrasApp />} />
+          <Route path="/zonas" element={<Zonas />} />
           <Route  path="/materiales" element={<Materiales />} />
+          
           <Route  path="/*" element={<Login />} />
 
         </Routes>
@@ -27,3 +28,4 @@ function App() {
 }
 
 export default App;
+
