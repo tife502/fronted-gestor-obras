@@ -138,7 +138,6 @@ const Materiales = () => {
           </form>
         </div>
   
-        <h3>Lista de Materiales</h3>
         <main className="table">
           <section className="table__header">
             <h1>Materiales Disponibles</h1>
@@ -175,3 +174,4 @@ const Materiales = () => {
   };
   
   export default Materiales;
+  
