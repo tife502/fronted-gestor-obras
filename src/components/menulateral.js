@@ -16,14 +16,20 @@ function MenuLateral({ children }) {
         <div className="menu-content">
           <ul>
             <li><Link to="/administrador">Administradores</Link></li>
-            <li><Link to="/obra">Obras</Link></li>
+            <li><Link to="/zonas">zonas</Link></li>
             <li><Link to="/materiales">Materiales</Link></li>
+            <li><Link to="/asistencia">Asistencia</Link></li>
           </ul>
         </div>
       </div>
       <div className={`contenido ${menuVisible ? "mover-derecha" : ""}`}>
         {children}
       </div>
+    </div>
+  );
+}
+
+export default MenuLateral;
     </div>
   );
 }
