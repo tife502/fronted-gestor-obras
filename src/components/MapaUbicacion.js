@@ -47,3 +47,4 @@ const MapaUbicacion = ({ setUbicacion }) => {
 };
 
 export default MapaUbicacion;
+
