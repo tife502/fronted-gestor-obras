@@ -1,208 +1,177 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import MenuLateral from "./menulateral";
-import "../estilos/obras.css";
+
+const API_URL = "http://127.0.0.1:5000/api/materiales";
 
 const Materiales = () => {
-  const [materiales, setMateriales] = useState([]);
-  const [zonas, setZonas] = useState([]); // Estado para almacenar las zonas
-  const [nuevoMaterial, setNuevoMaterial] = useState({ nombre: "", cantidad_disponible: 0, id_zona: "" });
-  const [editMaterialId, setEditMaterialId] = useState(null);
-  const [editMaterialData, setEditMaterialData] = useState({});
+    const [materiales, setMateriales] = useState([]);
+    const [nombre, setNombre] = useState("");
+    const [cantidad, setCantidad] = useState(0);
+    const [zonas, setZonas] = useState([]);
+    const [idZona, setIdZona] = useState("");
+    const [editando, setEditando] = useState(null);
 
-  // Obtener materiales
-  const obtenerMateriales = () => {
-    axios
-      .get("http://127.0.0.1:5000/api/materiales/mostrarmateriales")
-      .then((response) => setMateriales(response.data))
-      .catch((error) => console.error("Error al obtener materiales:", error));
-  };
+    useEffect(() => {
+        obtenerMateriales();
+        obtenerZonas();
+    }, []);
 
-  // Obtener zonas
-  const obtenerZonas = () => {
-    axios
-      .get("http://127.0.0.1:5000/api/zonas/mostrarzonas") // Ruta para obtener las zonas
-      .then((response) => setZonas(response.data))
-      .catch((error) => console.error("Error al obtener zonas:", error));
-  };
-
-  useEffect(() => {
-    obtenerMateriales();
-    obtenerZonas(); // Llamar a la función para obtener las zonas
-  }, []);
-
-  // Manejar cambios en el formulario de creación
-  const handleChange = (e) => {
-    setNuevoMaterial({ ...nuevoMaterial, [e.target.name]: e.target.value });
-  };
-
-  // Manejar cambios en el formulario de edición
-  const handleEditChange = (e, id) => {
-    setEditMaterialData({
-      ...editMaterialData,
-      [id]: { ...editMaterialData[id], [e.target.name]: e.target.value },
-    });
-  };
-
-  // Crear un nuevo material
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    axios
-      .post("http://127.0.0.1:5000/api/materiales/crearmateriales", nuevoMaterial)
-      .then(() => {
-        obtenerMateriales(); // Actualizar la lista de materiales
-        setNuevoMaterial({ nombre: "", cantidad_disponible: 0, id_zona: "" }); // Limpiar el formulario
-      })
-      .catch((error) => {
-        if (error.response && error.response.status === 400) {
-          // Mostrar alerta con el mensaje de error devuelto por el backend
-          alert(error.response.data.error);
-        } else {
-          console.error("Error al agregar material:", error);
-          alert("Ocurrió un error al agregar el material. Inténtalo nuevamente.");
+    // Obtener lista de materiales
+    const obtenerMateriales = async () => {
+        try {
+            const response = await axios.get(`${API_URL}/mostrarmateriales`);
+            setMateriales(response.data);
+        } catch (error) {
+            console.error("Error obteniendo materiales", error);
         }
-      });
-  };
+    };
+    const obtenerZonas = async () => {
+      try {
+        const response = await fetch("http://127.0.0.1:5000/api/zonas/mostrarzonas");
+        const data = await response.json();
+        console.log("Zonas obtenidas:", data); // <-- Agregado para depuración
+        setZonas(data);
+      } catch (error) {
+        console.error("Error al obtener zonas:", error);
+      }
+    };
+    
+    // Crear material
+    const crearMaterial = async () => {
+        if (!nombre || !idZona) {
+            alert("Nombre e ID de zona son obligatorios");
+            return;
+        }
 
-  // Editar un material existente
-  const handleEditSubmit = (id) => {
-    axios
-      .put(`http://127.0.0.1:5000/api/materiales/modificarmateriales/${id}`, editMaterialData[id])
-      .then(() => {
-        obtenerMateriales(); // Actualizar la lista de materiales
-        setEditMaterialId(null); // Salir del modo de edición
-      })
-      .catch((error) => console.error("Error al actualizar material:", error));
-  };
+        try {
+            await axios.post(`${API_URL}/crearmateriales`, {
+                nombre,
+                cantidad_disponible: cantidad,
+                id_zona: idZona
+            });
+            obtenerMateriales();
+            limpiarFormulario();
+        } catch (error) {
+            console.error("Error creando material", error);
+        }
+    };
 
-  // Eliminar un material
-  const handleDelete = (id) => {
-    axios
-      .delete(`http://127.0.0.1:5000/api/materiales/eliminarmateriales/${id}`)
-      .then(() => {
-        obtenerMateriales(); // Actualizar la lista de materiales
-      })
-      .catch((error) => console.error("Error al eliminar material:", error));
-  };
+    // Modificar material
+    const modificarMaterial = async (id) => {
+        try {
+            await axios.put(`${API_URL}/modificarmateriales/${id}`, {
+                nombre,
+                cantidad_disponible: cantidad,
+                id_zona: idZona
+            });
+            obtenerMateriales();
+            limpiarFormulario();
+            setEditando(null);
+        } catch (error) {
+            console.error("Error modificando material", error);
+        }
+    };
 
-  return (
-    <MenuLateral>
-      <div className="contenedor">
-        <div className="form-container">
-          <h2>Gestión de Materiales</h2>
+    // Eliminar material
+    const eliminarMaterial = async (id) => {
+        if (!window.confirm("¿Estás seguro de eliminar este material?")) return;
 
-          {/* Formulario para agregar material */}
-          <div className="form-container">
-            <h3>Agregar Nuevo Material</h3>
-            <form onSubmit={handleSubmit}>
-              <input
-                type="text"
-                name="nombre"
-                placeholder="Nombre"
-                value={nuevoMaterial.nombre}
-                onChange={handleChange}
-                required
-              />
-              <input
-                type="number"
-                name="cantidad_disponible"
-                placeholder="Cantidad Disponible"
-                value={nuevoMaterial.cantidad_disponible}
-                onChange={handleChange}
-                required
-              />
-              <select
-                name="id_zona"
-                value={nuevoMaterial.id_zona}
-                onChange={handleChange}
-                required
-              >
-                <option value="">Seleccionar Zona</option>
-                {zonas.map((zona) => (
-                  <option key={zona.id} value={zona.id}>
-                    {zona.nombre}
-                  </option>
-                ))}
-              </select>
-              <button type="submit">Agregar Material</button>
-            </form>
-          </div>
+        try {
+            await axios.delete(`${API_URL}/eliminarmateriales/${id}`);
+            obtenerMateriales();
+        } catch (error) {
+            console.error("Error eliminando material", error);
+        }
+    };
 
-          {/* Tabla de materiales */}
-          <div className="table-container">
-            <div className="table-wrapper">
-              <h3>Lista de Materiales</h3>
-              <table border="1">
-                <thead>
-                  <tr>
-                    <th>Nombre</th>
-                    <th>Cantidad Disponible</th>
-                    <th>ID de Zona</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {materiales.map((material) => (
-                    <tr key={material.id}>
-                      <td>
-                        {editMaterialId === material.id ? (
-                          <input
-                            type="text"
-                            name="nombre"
-                            value={editMaterialData[material.id]?.nombre || material.nombre}
-                            onChange={(e) => handleEditChange(e, material.id)}
-                          />
-                        ) : (
-                          material.nombre
-                        )}
-                      </td>
-                      <td>
-                        {editMaterialId === material.id ? (
-                          <input
-                            type="number"
-                            name="cantidad_disponible"
-                            value={
-                              editMaterialData[material.id]?.cantidad_disponible ||
-                              material.cantidad_disponible
-                            }
-                            onChange={(e) => handleEditChange(e, material.id)}
-                          />
-                        ) : (
-                          material.cantidad_disponible
-                        )}
-                      </td>
-                      <td>
-                        {editMaterialId === material.id ? (
-                          <input
-                            type="text"
-                            name="id_zona"
-                            value={editMaterialData[material.id]?.id_zona || material.id_zona}
-                            onChange={(e) => handleEditChange(e, material.id)}
-                          />
-                        ) : (
-                          material.id_zona
-                        )}
-                      </td>
-                      <td>
-                        {editMaterialId === material.id ? (
-                          <button onClick={() => handleEditSubmit(material.id)}>Guardar</button>
-                        ) : (
-                          <>
-                            <button onClick={() => setEditMaterialId(material.id)}>Editar</button>
-                            <button onClick={() => handleDelete(material.id)}>Eliminar</button>
-                          </>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+    // Cargar material en el formulario para edición
+    const cargarEdicion = (material) => {
+        setNombre(material.nombre);
+        setCantidad(material.cantidad_disponible);
+        setIdZona(material.id_zona);
+        setEditando(material.id);
+    };
+
+    // Limpiar formulario
+    const limpiarFormulario = () => {
+        setNombre("");
+        setCantidad(0);
+        setIdZona("");
+        setEditando(null);
+    };
+
+    return (
+      <div>
+        <MenuLateral>
+        <h2>Gestión de Materiales</h2>
+        <div className="contenedor-formulario">
+          <h3>{editando ? "Editar Material" : "Crear Nuevo Material"}</h3>
+          <form className="formulario-horizontal">
+            <div className="fila">
+              <div className="campo">
+                <label>Nombre:</label>
+                <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} required />
+              </div>
+              <div className="campo">
+                <label>Cantidad:</label>
+                <input type="number" value={cantidad} onChange={(e) => setCantidad(e.target.value)} required />
+              </div>
             </div>
-          </div>
+            <div className="fila">
+              <div className="campo">
+                <label>Zona:</label>
+                <select value={idZona} onChange={(e) => setIdZona(e.target.value)} required>
+                  <option value="">Seleccionar Zona</option>
+                  {zonas.map((zona) => (
+                    <option key={zona.id} value={zona.id}>{zona.nombre}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            <div className="boton-container">
+              <button type="button" className="btn-crear" onClick={editando ? () => modificarMaterial(editando) : crearMaterial}>
+                {editando ? "Actualizar" : "Crear"} Material
+              </button>
+              <button type="button" className="btn-cancelar" onClick={limpiarFormulario}>Cancelar</button>
+            </div>
+          </form>
         </div>
+  
+        <h3>Lista de Materiales</h3>
+        <main className="table">
+          <section className="table__header">
+            <h1>Materiales Disponibles</h1>
+          </section>
+          <section className="table__body">
+            <table>
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Cantidad</th>
+                  <th>Zona</th>
+                  <th>Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {materiales.map((material) => (
+                  <tr key={material.id}>
+                    <td>{material.nombre}</td>
+                    <td>{material.cantidad_disponible}</td>
+                    <td>{zonas.find((zona) => zona.id === material.id_zona)?.nombre || "Desconocido"}</td>
+                    <td>
+                      <button className="btn-editar" onClick={() => cargarEdicion(material)}>Editar</button>
+                      <button className="btn-eliminar" onClick={() => eliminarMaterial(material.id)}>Eliminar</button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </section>
+        </main>
+        </MenuLateral>
       </div>
-    </MenuLateral>
-  );
-};
-
-export default Materiales;
+    );
+  };
+  
+  export default Materiales;
