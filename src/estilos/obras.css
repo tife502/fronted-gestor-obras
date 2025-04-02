@@ -1,131 +1,151 @@
-/* Centrar todo el contenido en la pantalla */
-body {
-    height: 100%;
-    overflow: auto;
+
+html, body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4;
     margin: 0;
-    padding: 50px 10px 0 10px;
+    padding: 0;
+    height: 100vh;
+    overflow: auto; 
+  }
+  
+
+  .contenedor-formulario {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+    margin: 80px auto 20px; 
+  }
+  
+  h1, h2 {
+    text-align: center;
+    color: #333;
+  }
+  
+  .formulario-horizontal {
     display: flex;
     flex-direction: column;
-    align-items: center;
-}
-
-/* Contenedor de la tabla */
-.table-container {
-    width: 100%;
-    max-width: 900px;
-    margin: auto;
-    border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    border: 1px solid #ddd;
-    background: white;
-    padding: 10px;
-    height: auto;
-    overflow-x: auto;
-    text-align: center;
-}
-
-/* Contenedor con scroll */
-.table-wrapper {
-    max-height: 180px;
-    overflow-y: auto;
-    display: block;
-    border: 1px solid #ccc;
-}
-
-/* Ajuste de la tabla */
-table {
-    width: 160%;
-    border-collapse: collapse;
-    table-layout: auto;
-    font-size: 10px;
-    margin: auto; /* Centrar la tabla */
-}
-
-/* Ajuste de celdas */
-th, td {
-    padding: 4px 6px;
-    text-align: center;
-    border-bottom: 1px solid #ddd;
-    white-space: nowrap;
-}
-
-th {
-    background-color: #f0f0f0;
+    gap: 15px;
+  }
+  
+  .fila {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .campo {
+    display: flex;
+    flex-direction: column;
+    width: 48%;
+  }
+  
+  .campo label {
     font-weight: bold;
-}
-
-/* Forzar altura mínima en las filas */
-tr {
-    height: 24px;
-}
-
-/* Botones dentro de la tabla */
-table button {
-    font-size: 10px;
-    padding: 3px 6px;
+    margin-bottom: 5px;
+  }
+  
+  input[type="text"], input[type="checkbox"] {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+  
+  .ubicacion-input {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    padding: 8px;
+    border-radius: 5px;
+  }
+  
+  .icono-mapa {
+    margin-left: 10px;
+  }
+  
+  .boton-container {
+    text-align: center;
+  }
+  
+  .btn-crear {
     background: #28a745;
     color: white;
+    padding: 10px 15px;
     border: none;
-    cursor: pointer;
-    border-radius: 3px;
-}
-
-table button:hover {
-    background: #218838;
-}
-
-/* Contenedor de formularios centrado */
-.form-container {
-    display: flex;
-    align-items: center;
-    justify-content: center; /* Centrar los formularios */
-    gap: 8px;
-    margin-bottom: 10px;
-    width: 100%;
-    flex-wrap: wrap;
-    text-align: center;
-}
-
-/* Asegurar que los títulos estén centrados */
-h2 {
-    margin: 10px 0;
-    text-align: center;
-    width: 100%;
-    position: relative;
-    z-index: 10;
-}
-
-/* Formularios dentro del contenedor */
-.form-container form {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 6px;
-    margin: 0 auto;
-}
-
-/* Ajuste de inputs y selects */
-.form-container input,
-.form-container select {
-    padding: 5px;
-    border: 1px solid #ccc;
     border-radius: 5px;
-    font-size: 11px;
-    width: 140px;
-    text-align: center; /* Centrar texto dentro del input */
-}
+    cursor: pointer;
+  }
+  
+  .btn-crear:hover {
+    background: #218838;
+  }
+  
 
-/* Botones */
-.form-container button {
+  .table {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    margin: 20px;
+  }
+  
+  .table__body table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .table__body th, .table__body td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+  }
+  
+  .table__body th {
     background: #007bff;
     color: white;
-    border: none;
+  }
+  
+  .btn-editar, .btn-eliminar, .btn-guardar, .btn-cancelar {
     padding: 5px 10px;
-    cursor: pointer;
+    border: none;
     border-radius: 5px;
-    font-size: 11px;
-}
-
-.form-container button:hover {
-    background: #0056b3;
-}
+    cursor: pointer;
+    margin-right: 5px;
+  }
+  
+  .btn-editar {
+    background: #ffc107;
+  }
+  
+  .btn-eliminar {
+    background: #dc3545;
+    color: white;
+  }
+  
+  .btn-guardar {
+    background: #28a745;
+    color: white;
+  }
+  
+  .btn-cancelar {
+    background: #6c757d;
+    color: white;
+  }
+  
+  .btn-editar:hover {
+    background: #e0a800;
+  }
+  
+  .btn-eliminar:hover {
+    background: #c82333;
+  }
+  
+  .btn-guardar:hover {
+    background: #218838;
+  }
+  
+  .btn-cancelar:hover {
+    background: #5a6268;
+  }
