@@ -11,8 +11,7 @@ const SolicitudMaterial = () => {
   const [cantidad, setCantidad] = useState("");
   const [zonas, setZonas] = useState([]);
   const [idZona, setIdZona] = useState("");
-  const [nombre, setNombre] = useState(""); // Nuevo campo para el nombre del material
-  const [estadoEditando, setEstadoEditando] = useState(null); // Estado para editar solicitudes
+  const [nombre, setNombre] = useState("");
 
   useEffect(() => {
     obtenerSolicitudes();
@@ -66,7 +65,7 @@ const SolicitudMaterial = () => {
       trabajador_id: trabajadorId,
       cantidad,
       id_zona: idZona,
-      nombre, // Nuevo campo
+      nombre,
     };
 
     try {
@@ -81,7 +80,7 @@ const SolicitudMaterial = () => {
         setTrabajadorId("");
         setCantidad("");
         setIdZona("");
-        setNombre(""); // Limpiar el campo nombre
+        setNombre("");
         obtenerSolicitudes();
       }
     } catch (error) {
@@ -89,28 +88,7 @@ const SolicitudMaterial = () => {
     }
   };
 
-  // Modificar estado de la solicitud
-  const modificarEstado = async (solicitudId, nuevoEstado) => {
-    try {
-      const res = await fetch(`${API_URL}/modificarsolicitud/${solicitudId}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ estado: nuevoEstado }),
-      });
-
-      if (res.ok) {
-        alert("Estado de la solicitud actualizado exitosamente");
-        obtenerSolicitudes();
-      } else {
-        const errorData = await res.json();
-        alert(`Error: ${errorData.error}`);
-      }
-    } catch (error) {
-      console.error("Error al modificar el estado de la solicitud", error);
-    }
-  };
-
-  // Aprobar solicitud
+  // Aprobar solicitud y crear material automáticamente
   const aprobarSolicitud = async (solicitudId) => {
     try {
       const res = await fetch(`${API_URL}/aprobar-solicitud/${solicitudId}`, {
@@ -128,6 +106,27 @@ const SolicitudMaterial = () => {
       }
     } catch (error) {
       console.error("Error al aprobar la solicitud", error);
+    }
+  };
+
+  // Rechazar solicitud
+  const rechazarSolicitud = async (solicitudId) => {
+    try {
+      const res = await fetch(`${API_URL}/modificarsolicitud/${solicitudId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ estado: "Rechazado" }),
+      });
+
+      if (res.ok) {
+        alert("Solicitud rechazada exitosamente");
+        obtenerSolicitudes();
+      } else {
+        const errorData = await res.json();
+        alert(`Error: ${errorData.error}`);
+      }
+    } catch (error) {
+      console.error("Error al rechazar la solicitud", error);
     }
   };
 
@@ -218,10 +217,11 @@ const SolicitudMaterial = () => {
                     <td>{solicitud.estado}</td>
                     <td>{new Date(solicitud.fecha_solicitud).toLocaleString()}</td>
                     <td>
-                      <button onClick={() => modificarEstado(solicitud.id, "Aprobado")}>Aprobar</button>
-                      <button onClick={() => modificarEstado(solicitud.id, "Rechazado")}>Rechazar</button>
-                      {solicitud.estado === "Aprobado" && (
-                        <button onClick={() => aprobarSolicitud(solicitud.id)}>Crear Material</button>
+                      {solicitud.estado === "Pendiente" && (
+                        <>
+                          <button onClick={() => aprobarSolicitud(solicitud.id)}>Aprobar</button>
+                          <button onClick={() => rechazarSolicitud(solicitud.id)}>Rechazar</button>
+                        </>
                       )}
                     </td>
                   </tr>
