@@ -207,9 +207,4 @@ function Administrador() {
 };
 
 export default Administrador;
-      </div>
-    </MenuLateral>
-  );
-}
 
-export default Administrador;
