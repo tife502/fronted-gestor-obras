@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import MenuLateral from "./menulateral";
-import "../estilos/obras.css"; 
+import "../estilos/obras.css";
 
 const API_URL = "http://localhost:5000/api/solicitudes";
 
@@ -11,7 +11,8 @@ const SolicitudMaterial = () => {
   const [cantidad, setCantidad] = useState("");
   const [zonas, setZonas] = useState([]);
   const [idZona, setIdZona] = useState("");
-  const [estado, setEstado] = useState("Pendiente");
+  const [nombre, setNombre] = useState(""); // Nuevo campo para el nombre del material
+  const [estadoEditando, setEstadoEditando] = useState(null); // Estado para editar solicitudes
 
   useEffect(() => {
     obtenerSolicitudes();
@@ -56,7 +57,7 @@ const SolicitudMaterial = () => {
   const crearSolicitud = async (e) => {
     e.preventDefault();
 
-    if (!trabajadorId || !cantidad || !idZona) {
+    if (!trabajadorId || !cantidad || !idZona || !nombre) {
       alert("Todos los campos son obligatorios");
       return;
     }
@@ -65,7 +66,7 @@ const SolicitudMaterial = () => {
       trabajador_id: trabajadorId,
       cantidad,
       id_zona: idZona,
-      estado,
+      nombre, // Nuevo campo
     };
 
     try {
@@ -80,7 +81,7 @@ const SolicitudMaterial = () => {
         setTrabajadorId("");
         setCantidad("");
         setIdZona("");
-        setEstado("Pendiente");
+        setNombre(""); // Limpiar el campo nombre
         obtenerSolicitudes();
       }
     } catch (error) {
@@ -88,11 +89,53 @@ const SolicitudMaterial = () => {
     }
   };
 
+  // Modificar estado de la solicitud
+  const modificarEstado = async (solicitudId, nuevoEstado) => {
+    try {
+      const res = await fetch(`${API_URL}/modificarsolicitud/${solicitudId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ estado: nuevoEstado }),
+      });
+
+      if (res.ok) {
+        alert("Estado de la solicitud actualizado exitosamente");
+        obtenerSolicitudes();
+      } else {
+        const errorData = await res.json();
+        alert(`Error: ${errorData.error}`);
+      }
+    } catch (error) {
+      console.error("Error al modificar el estado de la solicitud", error);
+    }
+  };
+
+  // Aprobar solicitud
+  const aprobarSolicitud = async (solicitudId) => {
+    try {
+      const res = await fetch(`${API_URL}/aprobar-solicitud/${solicitudId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ estado: "Aprobado" }),
+      });
+
+      if (res.ok) {
+        alert("Solicitud aprobada y material creado exitosamente");
+        obtenerSolicitudes();
+      } else {
+        const errorData = await res.json();
+        alert(`Error: ${errorData.error}`);
+      }
+    } catch (error) {
+      console.error("Error al aprobar la solicitud", error);
+    }
+  };
+
   return (
     <MenuLateral>
       <div className="contenedor-formulario">
         <h2>Solicitudes de Material</h2>
-  
+
         {/* Formulario para crear solicitud */}
         <form className="formulario-horizontal" onSubmit={crearSolicitud}>
           <div className="fila">
@@ -107,7 +150,7 @@ const SolicitudMaterial = () => {
                 ))}
               </select>
             </div>
-  
+
             <div className="campo">
               <label>Cantidad:</label>
               <input
@@ -117,7 +160,7 @@ const SolicitudMaterial = () => {
               />
             </div>
           </div>
-  
+
           <div className="fila">
             <div className="campo">
               <label>Zona:</label>
@@ -128,22 +171,22 @@ const SolicitudMaterial = () => {
                 ))}
               </select>
             </div>
-  
+
             <div className="campo">
-              <label>Estado:</label>
-              <select value={estado} onChange={(e) => setEstado(e.target.value)}>
-                <option value="Pendiente">Pendiente</option>
-                <option value="Aprobado">Aprobado</option>
-                <option value="Rechazado">Rechazado</option>
-              </select>
+              <label>Nombre del Material:</label>
+              <input
+                type="text"
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
+              />
             </div>
           </div>
-  
+
           <div className="boton-container">
             <button type="submit" className="btn-crear">Crear Solicitud</button>
           </div>
         </form>
-  
+
         {/* Lista de solicitudes */}
         <div className="table">
           <h3>Lista de Solicitudes</h3>
@@ -155,8 +198,10 @@ const SolicitudMaterial = () => {
                   <th>Trabajador</th>
                   <th>Cantidad</th>
                   <th>Zona</th>
+                  <th>Nombre del Material</th>
                   <th>Estado</th>
                   <th>Fecha Solicitud</th>
+                  <th>Acciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -169,8 +214,16 @@ const SolicitudMaterial = () => {
                     </td>
                     <td>{solicitud.cantidad}</td>
                     <td>{zonas.find(z => z.id === solicitud.id_zona)?.nombre || "Desconocida"}</td>
+                    <td>{solicitud.nombre}</td>
                     <td>{solicitud.estado}</td>
                     <td>{new Date(solicitud.fecha_solicitud).toLocaleString()}</td>
+                    <td>
+                      <button onClick={() => modificarEstado(solicitud.id, "Aprobado")}>Aprobar</button>
+                      <button onClick={() => modificarEstado(solicitud.id, "Rechazado")}>Rechazar</button>
+                      {solicitud.estado === "Aprobado" && (
+                        <button onClick={() => aprobarSolicitud(solicitud.id)}>Crear Material</button>
+                      )}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -180,5 +233,6 @@ const SolicitudMaterial = () => {
       </div>
     </MenuLateral>
   );
-}
-  export default SolicitudMaterial;
+};
+
+export default SolicitudMaterial;
