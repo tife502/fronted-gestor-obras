@@ -18,6 +18,7 @@ function MenuLateral({ children }) {
             <li><Link to="/administrador">Administradores</Link></li>
             <li><Link to="/zonas">zonas</Link></li>
             <li><Link to="/materiales">Materiales</Link></li>
+            <li><Link to="/solicitudes">Solicitudes</Link></li>
             <li><Link to="/asistencia">Asistencia</Link></li>
           </ul>
         </div>
@@ -29,9 +30,5 @@ function MenuLateral({ children }) {
   );
 }
 
-export default MenuLateral;
-    </div>
-  );
-}
 
 export default MenuLateral;
