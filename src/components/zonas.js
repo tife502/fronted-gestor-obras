@@ -3,6 +3,7 @@ import MenuLateral from "./menulateral";
 import MapaUbicacion from "./MapaUbicacion";
 import "../estilos/obras.css"; 
 
+
 const Zonas = () => {
   const [zonas, setZonas] = useState([]);
   const [nombre, setNombre] = useState("");
@@ -13,7 +14,8 @@ const Zonas = () => {
   const mapaRef = useRef(null);
   const [mapaEdicionVisible, setMapaEdicionVisible] = useState(null);
   const [zonaEditandoId, setZonaEditandoId] = useState(null);
-const [zonaEditada, setZonaEditada] = useState({ nombre: "", descripcion: "", ubicacion: "", finalizada: false });
+  const [avance, setAvance] = useState(0);
+const [zonaEditada, setZonaEditada] = useState({ nombre: "", descripcion: "", ubicacion: "", finalizada: false, avance: 0, });
 
 
   useEffect(() => {
@@ -51,7 +53,7 @@ const [zonaEditada, setZonaEditada] = useState({ nombre: "", descripcion: "", ub
       const response = await fetch("http://127.0.0.1:5000/api/zonas/crearzonas", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombre, descripcion, ubicacion, finalizada }),
+        body: JSON.stringify({ nombre, descripcion, ubicacion, finalizada, avance }),
       });
       const data = await response.json();
       console.log(data);
@@ -60,6 +62,7 @@ const [zonaEditada, setZonaEditada] = useState({ nombre: "", descripcion: "", ub
       setDescripcion("");
       setUbicacion("");
       setFinalizada(false);
+      setAvance(0);
     } catch (error) {
       console.error("Error al crear zona:", error);
     }
@@ -185,6 +188,7 @@ const [zonaEditada, setZonaEditada] = useState({ nombre: "", descripcion: "", ub
                   <th>Descripción</th>
                   <th>Ubicación</th>
                   <th>Finalizada</th>
+                  <th>Avance</th>
                   <th>Acciones</th>
                 </tr>
               </thead>
@@ -251,6 +255,7 @@ const [zonaEditada, setZonaEditada] = useState({ nombre: "", descripcion: "", ub
           <td>{zona.descripcion}</td>
           <td>{zona.ubicacion}</td>
           <td>{zona.finalizada ? "Sí" : "No"}</td>
+          <td>{zona.avance}%</td>
           <td>
             <button className="btn-editar" onClick={() => editarZona(zona)}>Editar</button>
             <button className="btn-eliminar">Eliminar</button>
@@ -270,6 +275,8 @@ const [zonaEditada, setZonaEditada] = useState({ nombre: "", descripcion: "", ub
 };
 
 export default Zonas;
+
+
 
 
 
