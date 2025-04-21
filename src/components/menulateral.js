@@ -20,6 +20,7 @@ function MenuLateral({ children }) {
             <li><Link to="/materiales">Materiales</Link></li>
             <li><Link to="/solicitudes">Solicitudes</Link></li>
             <li><Link to="/asistencia">Asistencia</Link></li>
+            <li><Link to="/tareas">Tareas</Link></li>
           </ul>
         </div>
       </div>
@@ -32,3 +33,4 @@ function MenuLateral({ children }) {
 
 
 export default MenuLateral;
+
