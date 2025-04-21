@@ -8,6 +8,7 @@ import SolicitudMaterial from './components/solicitud';
 import Asistencia from './components/asistencia';
 import Materiales from './components/materiales';
 import Zonas from './components/zonas';
+import Tareas from './components/tareas';
 
 function App() {
   return (
@@ -21,6 +22,7 @@ function App() {
           <Route  path="/materiales" element={<Materiales />} />
           <Route  path="/solicitudes" element={<SolicitudMaterial />} />
           <Route  path="/asistencia" element={<Asistencia />} />
+          <Route  path="/tareas" element={<Tareas />} />
           
           <Route  path="/*" element={<Login />} />
 
@@ -31,4 +33,5 @@ function App() {
 }
 
 export default App;
+
 
