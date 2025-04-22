@@ -12,9 +12,9 @@ const Tareas = () => {
   const [mensaje, setMensaje] = useState("");
   const [trabajadores, setTrabajadores] = useState([]);
   const [zonas, setZonas] = useState([]);
-  const [tareaEditando, setTareaEditando] = useState(null);  // Estado para la tarea que se está editando
+  const [tareaEditando, setTareaEditando] = useState(null); 
 
-
+  const rol_id = localStorage.getItem("rol_id");
   useEffect(() => {
     fetch("http://localhost:5000/api/tareas/obtenertareas")
       .then((res) => res.json())
@@ -30,9 +30,9 @@ const Tareas = () => {
   }, []);
 
   const handleImageChange = (e, tareaId) => {
-    const files = Array.from(e.target.files).slice(0, 3); // máximo 3 archivos
+    const files = Array.from(e.target.files).slice(0, 3);
     const readers = [];
-    const newEvidencias = []; // Para almacenar las evidencias que se leerán
+    const newEvidencias = []; 
     
     files.forEach((file, index) => {
       const reader = new FileReader();
@@ -40,16 +40,16 @@ const Tareas = () => {
       reader.onloadend = () => {
         newEvidencias.push(reader.result);
         if (newEvidencias.length === files.length) {
-          // Obtener la tarea en la que estamos trabajando
+          
           const updatedTareas = tareas.map((tarea) => {
             if (tarea.id === tareaId) {
-              // Actualizar las evidencias de la tarea
+              
               const updatedEvidencias = [...JSON.parse(tarea.evidencia || '[]'), ...newEvidencias];
               return { ...tarea, evidencia: JSON.stringify(updatedEvidencias) };
             }
             return tarea;
           });
-          setTareas(updatedTareas); // Actualizar el estado con las nuevas evidencias
+          setTareas(updatedTareas); 
         }
       };
       
@@ -85,14 +85,14 @@ const Tareas = () => {
       .then((res) => res.json())
       .then((data) => {
         setMensaje(data.mensaje || data.error);
-        // Actualiza la lista después de eliminar
+        
         setTareas((prev) => prev.filter((t) => t.id !== id));
       })
       .catch((error) => console.error("Error al eliminar tarea:", error));
   };
   
   const editarTarea = (tarea) => {
-    // Puedes precargar los campos del formulario con esta tarea
+   
     setDescripcion(tarea.descripcion);
     setEstado(tarea.estado);
     setTrabajadorId(tarea.trabajador_id);
@@ -105,10 +105,10 @@ const Tareas = () => {
       }
     });
     setMensaje(`Editando tarea ID ${tarea.id}`);
-    // Aquí puedes guardar el ID en edición y cambiar el submit a un update
+    
   };
   const handleEditar = (tarea) => {
-    setTareaEditando(tarea.id);  // Establecer la tarea en modo edición
+    setTareaEditando(tarea.id);  
   };
   
   const handleGuardar = (id) => {
@@ -131,9 +131,9 @@ const Tareas = () => {
         .then((res) => res.json())
         .then((data) => {
           setMensaje(data.mensaje || data.error);
-          // Actualiza la tarea en la tabla
+          
           setTareas(tareas.map((t) => (t.id === id ? tareaEditada : t)));
-          setTareaEditando(null); // Cierra el modo de edición
+          setTareaEditando(null);
         })
         .catch((error) => console.error("Error al guardar tarea:", error));
     } else {
@@ -150,7 +150,7 @@ const Tareas = () => {
       nuevoEstado = "Completada";
     }
   
-    // Actualizar el estado de la tarea en el estado local
+    
     const tareaActualizada = { ...tarea, estado: nuevoEstado };
     setTareas((prevTareas) =>
       prevTareas.map((t) => (t.id === tarea.id ? tareaActualizada : t))
@@ -171,7 +171,7 @@ const Tareas = () => {
       }
     } catch (error) {
       console.error("Error al guardar el cambio de estado:", error);
-      // Revertir el cambio en el estado local si hubo un error
+      
       setTareas((prevTareas) =>
         prevTareas.map((t) =>
           t.id === tarea.id ? { ...t, estado: tarea.estado } : t
@@ -187,7 +187,8 @@ const Tareas = () => {
       <div className="contenedor-formulario">
         <h2>Crear Nueva Tarea</h2>
 
-        {/* Formulario para crear tarea */}
+        
+        {(rol_id === "2" || rol_id === "3") && (
         <form className="formulario-horizontal" onSubmit={handleSubmit}>
           <div className="fila">
             <div className="campo">
@@ -247,11 +248,12 @@ const Tareas = () => {
             <button type="submit" className="btn-crear">Crear Tarea</button>
           </div>
         </form>
+      )}
 
-        {/* Mostrar mensaje */}
+        
         {mensaje && <p>{mensaje}</p>}
 
-        {/* Lista de tareas */}
+       
         <div className="table">
   <h3>Lista de Tareas</h3>
   <div className="table__body">
@@ -385,24 +387,33 @@ const Tareas = () => {
 
 
 
-            <td>
-              {tareaEditando === tarea.id ? (
-                <button onClick={() => handleGuardar(tarea.id)}>Guardar</button>
-              ) : (
-                <button onClick={() => setTareaEditando(tarea.id)}>Editar</button>
-              )}
-              {tarea.estado !== "Completada" && (
-                        <button onClick={() => cambiarEstado(tarea)} style={{ marginLeft: "10px" }}>
-                          Cambiar Estado
-                        </button>
-                      )}
-              <button
-                onClick={() => eliminarTarea(tarea.id)}
-                style={{ marginLeft: "10px", color: "red" }}
-              >
-                Eliminar
-              </button>
-            </td>
+<td>
+  {(rol_id === "2" || rol_id === "3") && (
+    <>
+      {tareaEditando === tarea.id ? (
+        <button onClick={() => handleGuardar(tarea.id)}>Guardar</button>
+      ) : (
+        <button onClick={() => setTareaEditando(tarea.id)}>Editar</button>
+      )}
+    </>
+  )}
+
+  {(rol_id === "2" || rol_id === "3" || rol_id === "4") && tarea.estado !== "Completada" && (
+    <button onClick={() => cambiarEstado(tarea)} style={{ marginLeft: "10px" }}>
+      Cambiar Estado
+    </button>
+  )}
+
+  {(rol_id === "2" || rol_id === "3") && (
+    <button
+      onClick={() => eliminarTarea(tarea.id)}
+      style={{ marginLeft: "10px", color: "red" }}
+    >
+      Eliminar
+    </button>
+  )}
+</td>
+
           </tr>
         ))}
       </tbody>
@@ -417,5 +428,7 @@ const Tareas = () => {
 };
 
 export default Tareas;
+
+
 
 
