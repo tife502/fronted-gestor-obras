@@ -11,6 +11,7 @@ const Materiales = () => {
     const [zonas, setZonas] = useState([]);
     const [idZona, setIdZona] = useState("");
     const [editando, setEditando] = useState(null);
+    const rol_id = localStorage.getItem("rol_id");
 
     useEffect(() => {
         obtenerMateriales();
@@ -104,74 +105,82 @@ const Materiales = () => {
     return (
       <div>
         <MenuLateral>
-        <h2>Gestión de Materiales</h2>
-        <div className="contenedor-formulario">
-          <h3>{editando ? "Editar Material" : "Crear Nuevo Material"}</h3>
-          <form className="formulario-horizontal">
-            <div className="fila">
-              <div className="campo">
-                <label>Nombre:</label>
-                <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} required />
-              </div>
-              <div className="campo">
-                <label>Cantidad:</label>
-                <input type="number" value={cantidad} onChange={(e) => setCantidad(e.target.value)} required />
-              </div>
+          <h2>Gestión de Materiales</h2>
+    
+          {/* Formulario solo visible para roles 2 y 3 */}
+          {(rol_id === "2" || rol_id === "3") && (
+            <div className="contenedor-formulario">
+              <h3>{editando ? "Editar Material" : "Crear Nuevo Material"}</h3>
+              <form className="formulario-horizontal">
+                <div className="fila">
+                  <div className="campo">
+                    <label>Nombre:</label>
+                    <input type="text" value={nombre} onChange={(e) => setNombre(e.target.value)} required />
+                  </div>
+                  <div className="campo">
+                    <label>Cantidad:</label>
+                    <input type="number" value={cantidad} onChange={(e) => setCantidad(e.target.value)} required />
+                  </div>
+                </div>
+                <div className="fila">
+                  <div className="campo">
+                    <label>Zona:</label>
+                    <select value={idZona} onChange={(e) => setIdZona(e.target.value)} required>
+                      <option value="">Seleccionar Zona</option>
+                      {zonas.map((zona) => (
+                        <option key={zona.id} value={zona.id}>{zona.nombre}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div className="boton-container">
+                  <button type="button" className="btn-crear" onClick={editando ? () => modificarMaterial(editando) : crearMaterial}>
+                    {editando ? "Actualizar" : "Crear"} Material
+                  </button>
+                  <button type="button" className="btn-cancelar" onClick={limpiarFormulario}>Cancelar</button>
+                </div>
+              </form>
             </div>
-            <div className="fila">
-              <div className="campo">
-                <label>Zona:</label>
-                <select value={idZona} onChange={(e) => setIdZona(e.target.value)} required>
-                  <option value="">Seleccionar Zona</option>
-                  {zonas.map((zona) => (
-                    <option key={zona.id} value={zona.id}>{zona.nombre}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            <div className="boton-container">
-              <button type="button" className="btn-crear" onClick={editando ? () => modificarMaterial(editando) : crearMaterial}>
-                {editando ? "Actualizar" : "Crear"} Material
-              </button>
-              <button type="button" className="btn-cancelar" onClick={limpiarFormulario}>Cancelar</button>
-            </div>
-          </form>
-        </div>
-  
-        <main className="table">
-          <section className="table__header">
-            <h1>Materiales Disponibles</h1>
-          </section>
-          <section className="table__body">
-            <table>
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th>Cantidad</th>
-                  <th>Zona</th>
-                  <th>Acciones</th>
-                </tr>
-              </thead>
-              <tbody>
-                {materiales.map((material) => (
-                  <tr key={material.id}>
-                    <td>{material.nombre}</td>
-                    <td>{material.cantidad_disponible}</td>
-                    <td>{zonas.find((zona) => zona.id === material.id_zona)?.nombre || "Desconocido"}</td>
-                    <td>
-                      <button className="btn-editar" onClick={() => cargarEdicion(material)}>Editar</button>
-                      <button className="btn-eliminar" onClick={() => eliminarMaterial(material.id)}>Eliminar</button>
-                    </td>
+          )}
+    
+          <main className="table">
+            <section className="table__header">
+              <h1>Materiales Disponibles</h1>
+            </section>
+            <section className="table__body">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Nombre</th>
+                    <th>Cantidad</th>
+                    <th>Zona</th>
+                    <th>Acciones</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
-        </main>
+                </thead>
+                <tbody>
+                  {materiales.map((material) => (
+                    <tr key={material.id}>
+                      <td>{material.nombre}</td>
+                      <td>{material.cantidad_disponible}</td>
+                      <td>{zonas.find((zona) => zona.id === material.id_zona)?.nombre || "Desconocido"}</td>
+                      <td>
+                        {(rol_id === "2" || rol_id === "3") && (
+                          <>
+                            <button className="btn-editar" onClick={() => cargarEdicion(material)}>Editar</button>
+                            <button className="btn-eliminar" onClick={() => eliminarMaterial(material.id)}>Eliminar</button>
+                          </>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </section>
+          </main>
         </MenuLateral>
       </div>
     );
-  };
+  }    
   
   export default Materiales;
   
