@@ -17,6 +17,9 @@ const Zonas = () => {
   const [avance, setAvance] = useState(0);
 const [zonaEditada, setZonaEditada] = useState({ nombre: "", descripcion: "", ubicacion: "", finalizada: false, avance: 0, });
 
+const rol_id = localStorage.getItem("rol_id");
+
+
 
   useEffect(() => {
     obtenerZonas();
@@ -128,54 +131,59 @@ const [zonaEditada, setZonaEditada] = useState({ nombre: "", descripcion: "", ub
         <h1 className="titulo">Zonas de Trabajo</h1>
         <div className="contenedor-formulario">
           <h2>Crear Nueva Zona</h2>
-          <form onSubmit={crearZona} className="formulario-horizontal">
-            <div className="fila">
-              <div className="campo">
-                <label>Nombre:</label>
-                <input
-                  type="text"
-                  placeholder="Nombre de la zona"
-                  value={nombre}
-                  onChange={(e) => setNombre(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="campo">
-                <label>Descripción:</label>
-                <input
-                  type="text"
-                  placeholder="Descripción de la zona"
-                  value={descripcion}
-                  onChange={(e) => setDescripcion(e.target.value)}
-                />
-              </div>
-            </div>
+          {rol_id === "2" && (
+  <form onSubmit={crearZona} className="formulario-horizontal">
+    <div className="fila">
+      <div className="campo">
+        <label>Nombre:</label>
+        <input
+          type="text"
+          placeholder="Nombre de la zona"
+          value={nombre}
+          onChange={(e) => setNombre(e.target.value)}
+          required
+        />
+      </div>
+      <div className="campo">
+        <label>Descripción:</label>
+        <input
+          type="text"
+          placeholder="Descripción de la zona"
+          value={descripcion}
+          onChange={(e) => setDescripcion(e.target.value)}
+        />
+      </div>
+    </div>
 
-            <div className="fila">
-              <div className="campo ubicacion-container" ref={mapaRef}>
-                <label>Ubicación:</label>
-                <div className="ubicacion-input" onClick={() => setMostrarMapa(!mostrarMapa)}>
-                  <input type="text" placeholder="Selecciona ubicación" value={ubicacion} readOnly />
-                  <span className="icono-mapa">📍</span>
-                </div>
-                {mostrarMapa && <MapaUbicacion setUbicacion={setUbicacion} setMostrarMapa={setMostrarMapa} />}
-              </div>
-              <div className="campo campo-checkbox">
-                <label>Finalizada:</label>
-                <input
-                  type="checkbox"
-                  checked={finalizada}
-                  onChange={(e) => setFinalizada(e.target.checked)}
-                />
-              </div>
-            </div>
-
-            <div className="boton-container">
-              <button type="submit" className="btn-crear">Crear Zona</button>
-            </div>
-          </form>
+    <div className="fila">
+      <div className="campo ubicacion-container" ref={mapaRef}>
+        <label>Ubicación:</label>
+        <div className="ubicacion-input" onClick={() => setMostrarMapa(!mostrarMapa)}>
+          <input type="text" placeholder="Selecciona ubicación" value={ubicacion} readOnly />
+          <span className="icono-mapa">📍</span>
         </div>
+        {mostrarMapa && (
+          <MapaUbicacion setUbicacion={setUbicacion} setMostrarMapa={setMostrarMapa} />
+        )}
+      </div>
+      <div className="campo campo-checkbox">
+        <label>Finalizada:</label>
+        <input
+          type="checkbox"
+          checked={finalizada}
+          onChange={(e) => setFinalizada(e.target.checked)}
+        />
+      </div>
+    </div>
 
+    <div className="boton-container">
+      <button type="submit" className="btn-crear">Crear Zona</button>
+    </div>
+  </form>
+)}
+
+        </div>
+        {(rol_id === "2" || rol_id === "3") && (
         <main className="table" id="customers_table">
           <section className="table__header">
             <h1>Zonas de Trabajo</h1>
@@ -256,10 +264,13 @@ const [zonaEditada, setZonaEditada] = useState({ nombre: "", descripcion: "", ub
           <td>{zona.ubicacion}</td>
           <td>{zona.finalizada ? "Sí" : "No"}</td>
           <td>{zona.avance}%</td>
-          <td>
-            <button className="btn-editar" onClick={() => editarZona(zona)}>Editar</button>
-            <button className="btn-eliminar">Eliminar</button>
-          </td>
+          {rol_id === "2" && (
+          <>
+            <button onClick={() => editarZona(zona)}>Editar</button>
+            <button onClick={() => eliminarZona(zona.id)}>Eliminar</button>
+          </>
+        )}
+
         </>
       )}
     </tr>
@@ -269,6 +280,7 @@ const [zonaEditada, setZonaEditada] = useState({ nombre: "", descripcion: "", ub
             </table>
           </section>
         </main>
+        )}
       </MenuLateral>
     </div>
   );
