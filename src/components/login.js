@@ -19,6 +19,7 @@ function Login() {
                 email: correo, 
                 password: contraseña 
             });
+            console.log('Respuesta del login:', response.data);  
             return response.data;  
         } catch (error) {
             if (error.response) {
@@ -38,17 +39,35 @@ function Login() {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+        
         if (!correo || !contraseña) {
             alert("Por favor, completa todos los campos.");
             return;
         }
+        
         const data = await loginUsuario();
-        if (data && data.token) {
+        
+        console.log("Datos de login:", data);  
+        
+        if (data && data.token && data.rol_id && data.id) {
             localStorage.setItem("token", data.token);
-            setUserId(data.token);
-            navigate("/administrador");
+            localStorage.setItem("rol_id", data.rol_id);  
+            localStorage.setItem("id", data.id);  
+    
+            console.log("Datos guardados en localStorage:");
+            console.log('token:', localStorage.getItem('token'));
+            console.log('rol_id:', localStorage.getItem('rol_id'));
+            console.log('id:', localStorage.getItem('id'));
+    
+            setUserId(data.id);  
+            navigate("/administrador");  
+        } else {
+            console.error("Error de autenticación: datos incompletos");
+            alert("Datos incompletos, por favor intenta de nuevo.");
         }
     };
+    
+    
 
     const handleSubmitRegistro = async (event) => {
         event.preventDefault();
