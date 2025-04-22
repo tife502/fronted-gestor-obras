@@ -13,6 +13,8 @@ const SolicitudMaterial = () => {
   const [idZona, setIdZona] = useState("");
   const [nombre, setNombre] = useState("");
 
+  const rol_id = localStorage.getItem("rol_id");
+
   useEffect(() => {
     obtenerSolicitudes();
     obtenerZonas();
@@ -136,6 +138,7 @@ const SolicitudMaterial = () => {
         <h2>Solicitudes de Material</h2>
 
         {/* Formulario para crear solicitud */}
+        {( rol_id === "3" || rol_id === "4") && (
         <form className="formulario-horizontal" onSubmit={crearSolicitud}>
           <div className="fila">
             <div className="campo">
@@ -185,6 +188,7 @@ const SolicitudMaterial = () => {
             <button type="submit" className="btn-crear">Crear Solicitud</button>
           </div>
         </form>
+        )}
 
         {/* Lista de solicitudes */}
         <div className="table">
@@ -217,13 +221,13 @@ const SolicitudMaterial = () => {
                     <td>{solicitud.estado}</td>
                     <td>{new Date(solicitud.fecha_solicitud).toLocaleString()}</td>
                     <td>
-                      {solicitud.estado === "Pendiente" && (
-                        <>
-                          <button onClick={() => aprobarSolicitud(solicitud.id)}>Aprobar</button>
-                          <button onClick={() => rechazarSolicitud(solicitud.id)}>Rechazar</button>
-                        </>
-                      )}
-                    </td>
+                    {(rol_id === "2" && rol_id === "3" && solicitud.estado === "Pendiente") && (
+                      <>
+                        <button onClick={() => aprobarSolicitud(solicitud.id)}>Aprobar</button>
+                        <button onClick={() => rechazarSolicitud(solicitud.id)}>Rechazar</button>
+                      </>
+                    )}
+                  </td>
                   </tr>
                 ))}
               </tbody>
