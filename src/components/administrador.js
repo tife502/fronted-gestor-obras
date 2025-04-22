@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, response} from "react";
 import axios from "axios";
 import "../estilos/login.css";
 import MenuLateral from "./menulateral";
@@ -14,30 +14,55 @@ function Administrador() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Cargar usuarios desde la API
-  useEffect(() => {
-    const fetchUsuarios = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/api/usuarios/mostrarusuarios");
-        setUsuarios(response.data);
-      } catch (error) {
-        console.error("Error al obtener usuarios:", error.response || error);
-        setError("Hubo un error al cargar los usuarios");
-      } finally {
-        setLoading(false);
-      }
-    };
-    const fetchZonas = async () => {
-      try {
-        const response = await axios.get("http://localhost:5000/api/zonas/mostrarzonas");
-        setZonas(response.data);
-      } catch (error) {
-        console.error("Error al obtener zonas:", error);
-      }
-    };
-    fetchUsuarios();
-    fetchZonas();
-  }, []);
+
+ const rolId = localStorage.getItem("rol_id");
+ const userId = localStorage.getItem("id");
+ console.log('rolId:', rolId);  
+ console.log('userId:', userId);
+ 
+
+ const esAdmin = rolId === "1";  
+
+ 
+ useEffect(() => {
+  
+  const fetchData = async () => {
+    try {
+      
+      const rolId = localStorage.getItem("rol_id");
+      const userId = localStorage.getItem("id");
+      console.log('rolId:', rolId); 
+      console.log('userId:', userId);
+
+      
+      const responseUsuarios = await axios.get("http://localhost:5000/api/usuarios/mostrarusuarios");
+      console.log("Usuarios obtenidos:", responseUsuarios.data); 
+
+      // Si es un administrador (rolId == 1), carga todos los usuarios
+      // Si no es admin, solo muestra el usuario correspondiente al userId
+      const usuariosFiltrados = rolId === "1" 
+        ? responseUsuarios.data
+        : responseUsuarios.data.filter((usuario) => usuario.id.toString() === userId);
+
+      // Establecer usuarios filtrados en el estado
+      setUsuarios(usuariosFiltrados);
+
+     
+      const responseZonas = await axios.get("http://localhost:5000/api/zonas/mostrarzonas");
+      console.log("Zonas obtenidas:", responseZonas.data); 
+      setZonas(responseZonas.data);
+      
+    } catch (error) {
+      setError("Hubo un error al cargar los datos.");
+      console.error("Error al obtener datos:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchData();
+}, []); //
+  
 
   // Función para eliminar usuario
   const eliminarUsuario = async (id) => {
@@ -134,8 +159,12 @@ function Administrador() {
                 <th>Email</th>
                 <th>Rol</th>
                 <th>Zona</th>
-                <th>Editar</th>
-                <th>Eliminar</th>
+                {esAdmin && (
+                <>
+                  <th>Editar</th>
+                  <th>Eliminar</th>
+                </>
+              )}
               </tr>
             </thead>
             <tbody>
@@ -188,12 +217,20 @@ function Administrador() {
                       <td>{usuario.email}</td>
                       <td>{usuario.rol}</td>
                       <td>{usuario.id_zona ? usuario.id_zona : ""}</td>
-                      <td>
-                        <button onClick={() => setEditUser(usuario)}>Editar</button>
-                      </td>
-                      <td>
-                        <button onClick={() => eliminarUsuario(usuario.id)}>Eliminar</button>
-                      </td>
+                      {esAdmin ? (
+                      <>
+                        <td>
+                          <button onClick={() => setEditUser(usuario)}>Editar</button>
+                        </td>
+                        <td>
+                          <button onClick={() => eliminarUsuario(usuario.id)}>Eliminar</button>
+                        </td>
+                      </>
+                    ) : (
+                      <>
+                        <td colSpan="2">Sin permisos</td>
+                      </>
+                    )}
                     </>
                   )}
                 </tr>
