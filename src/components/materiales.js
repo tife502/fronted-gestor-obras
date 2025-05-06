@@ -134,10 +134,20 @@ const Materiales = () => {
                   </div>
                 </div>
                 <div className="boton-container">
-                  <button type="button" className="btn-crear" onClick={editando ? () => modificarMaterial(editando) : crearMaterial}>
+                  <button
+                    type="button"
+                    className="btn-crear"
+                    onClick={editando ? () => modificarMaterial(editando) : crearMaterial}
+                  >
                     {editando ? "Actualizar" : "Crear"} Material
                   </button>
-                  <button type="button" className="btn-cancelar" onClick={limpiarFormulario}>Cancelar</button>
+                  <button
+                    type="button"
+                    className="btn-cancelar"
+                    onClick={limpiarFormulario}
+                  >
+                    Cancelar
+                  </button>
                 </div>
               </form>
             </div>
@@ -162,7 +172,7 @@ const Materiales = () => {
                     <tr key={material.id}>
                       <td>{material.nombre}</td>
                       <td>{material.cantidad_disponible}</td>
-                      <td>{zonas.find((zona) => zona.id === material.id_zona)?.nombre || "Desconocido"}</td>
+                      <td>{zonas.find((zona) => zona.id === material.id_zona)?.nombre}</td>
                       <td>
                         {(rol_id === "2" || rol_id === "3") && (
                           <>
@@ -183,6 +193,6 @@ const Materiales = () => {
   }    
   
   export default Materiales;
-  
 
-  
+
+

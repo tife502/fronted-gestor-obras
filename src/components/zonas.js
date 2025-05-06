@@ -35,10 +35,21 @@ const rol_id = localStorage.getItem("rol_id");
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (mapaRef.current && !mapaRef.current.contains(event.target)) {
+        setMapaEdicionVisible(null); // Asegúrate de cerrar el mapa correctamente
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [mapaRef]);
+
   const obtenerZonas = async () => {
     try {
       const response = await fetch("http://127.0.0.1:5000/api/zonas/mostrarzonas");
       const data = await response.json();
+      console.log("Zonas obtenidas:", data);
       setZonas(data);
     } catch (error) {
       console.error("Error al obtener zonas:", error);
@@ -79,13 +90,8 @@ const rol_id = localStorage.getItem("rol_id");
       console.error("Error al eliminar zona:", error);
     }
   };
-
-  const manejarMapa = () => {
-    setMostrarMapa(!mostrarMapa);
-  };
-  const iniciarEdicion = (zona) => {
-    setZonaEditandoId(zona.id);
-    setZonaEditada(zona);
+  const manejarMapaEdicion = (zonaId) => {
+    setMapaEdicionVisible((prev) => (prev === zonaId ? null : zonaId));
   };
   const editarZona = (zona) => {
     console.log("Editando zona:", zona);
@@ -99,6 +105,7 @@ const rol_id = localStorage.getItem("rol_id");
   };
   const guardarZona = async (id) => {
     try {
+      console.log("Datos enviados para editar zona:", zonaEditada);
       console.log("ID de la zona:", id);
       console.log("Datos a enviar:", zonaEditada);
   
@@ -166,14 +173,6 @@ const rol_id = localStorage.getItem("rol_id");
           <MapaUbicacion setUbicacion={setUbicacion} setMostrarMapa={setMostrarMapa} />
         )}
       </div>
-      <div className="campo campo-checkbox">
-        <label>Finalizada:</label>
-        <input
-          type="checkbox"
-          checked={finalizada}
-          onChange={(e) => setFinalizada(e.target.checked)}
-        />
-      </div>
     </div>
 
     <div className="boton-container">
@@ -228,12 +227,17 @@ const rol_id = localStorage.getItem("rol_id");
         readOnly
         onClick={() => setMapaEdicionVisible(zona.id)}
       />
-      <span className="icono-mapa" onClick={() => setMapaEdicionVisible(zona.id)}>📍</span>
+      <span
+        className="icono-mapa"
+        onClick={() => manejarMapaEdicion(zona.id)}
+      >
+        📍
+      </span>
       {mapaEdicionVisible === zona.id && (
         <MapaUbicacion
           setUbicacion={(nuevaUbicacion) => {
             setZonaEditada({ ...zonaEditada, ubicacion: nuevaUbicacion });
-            setMapaEdicionVisible(null);
+            setMapaEdicionVisible(null); // Cierra el mapa después de seleccionar la ubicación
           }}
           setMostrarMapa={() => setMapaEdicionVisible(null)}
         />
@@ -243,13 +247,14 @@ const rol_id = localStorage.getItem("rol_id");
     zona.ubicacion
   )}
 </td>
-
-
           <td>
             <input
               type="checkbox"
               checked={zonaEditada.finalizada}
-              onChange={(e) => setZonaEditada({ ...zonaEditada, finalizada: e.target.checked })}
+              onChange={(e) => {
+                console.log("Checkbox cambiado a:", e.target.checked);
+                setZonaEditada({ ...zonaEditada, finalizada: e.target.checked });
+              }}
             />
           </td>
           <td>
@@ -259,11 +264,11 @@ const rol_id = localStorage.getItem("rol_id");
         </>
       ) : (
         <>
-          <td>{zona.nombre}</td>
-          <td>{zona.descripcion}</td>
-          <td>{zona.ubicacion}</td>
+          <td>{zona.nombre || "Sin Nombre"}</td>
+          <td>{zona.descripcion || "Sin descripción"}</td>
+          <td>{zona.ubicacion || "Sin Ubicación"}</td>
           <td>{zona.finalizada ? "Sí" : "No"}</td>
-          <td>{zona.avance}%</td>
+          <td>{zona.avance}</td>
           {rol_id === "2" && (
           <>
             <button onClick={() => editarZona(zona)}>Editar</button>

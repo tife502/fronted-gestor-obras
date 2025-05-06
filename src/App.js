@@ -9,6 +9,7 @@ import Asistencia from './components/asistencia';
 import Materiales from './components/materiales';
 import Zonas from './components/zonas';
 import Tareas from './components/tareas';
+import "bootstrap/dist/css/bootstrap.min.css";
 
 function App() {
   return (

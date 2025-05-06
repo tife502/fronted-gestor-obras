@@ -143,13 +143,26 @@ const SolicitudMaterial = () => {
           <div className="fila">
             <div className="campo">
               <label>Trabajador:</label>
-              <select value={trabajadorId} onChange={(e) => setTrabajadorId(e.target.value)}>
+              <select
+                value={trabajadorId}
+                onChange={(e) => setTrabajadorId(e.target.value)}
+                required
+              >
                 <option value="">Seleccione un trabajador</option>
-                {trabajadores.map((trabajador) => (
-                  <option key={trabajador.id} value={trabajador.id}>
-                    {trabajador.nombre} {trabajador.apellido}
-                  </option>
-                ))}
+                {trabajadores
+                  .filter((trabajador) => {
+                    // Si el rol es 4, solo mostrar el usuario actual
+                    if (rol_id === "4") {
+                      const usuario_id = localStorage.getItem("usuario_id");
+                      return trabajador.id === parseInt(usuario_id, 10);
+                    }
+                    return true; // Mostrar todos los trabajadores para otros roles
+                  })
+                  .map((trabajador) => (
+                    <option key={trabajador.id} value={trabajador.id}>
+                      {trabajador.nombre} {trabajador.apellido}
+                    </option>
+                  ))}
               </select>
             </div>
 

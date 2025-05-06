@@ -16,7 +16,7 @@ function MenuLateral({ children }) {
         <div className="menu-content">
           <ul>
             <li><Link to="/administrador">Administradores</Link></li>
-            <li><Link to="/zonas">zonas</Link></li>
+            <li><Link to="/zonas">Zonas</Link></li>
             <li><Link to="/materiales">Materiales</Link></li>
             <li><Link to="/solicitudes">Solicitudes</Link></li>
             <li><Link to="/asistencia">Asistencia</Link></li>
