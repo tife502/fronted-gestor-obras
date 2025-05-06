@@ -24,7 +24,7 @@ const SolicitudMaterial = () => {
   // Obtener solicitudes
   const obtenerSolicitudes = async () => {
     try {
-      const res = await fetch(`${API_URL}/mostrarsolicitudes`);
+      const res = await fetch('${API_URL}/mostrarsolicitudes');
       const data = await res.json();
       setSolicitudes(data);
     } catch (error) {
@@ -71,7 +71,7 @@ const SolicitudMaterial = () => {
     };
 
     try {
-      const res = await fetch(`${API_URL}/crearsolicitud`, {
+      const res = await fetch('${API_URL}/crearsolicitud', {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(nuevaSolicitud),
@@ -93,7 +93,7 @@ const SolicitudMaterial = () => {
   // Aprobar solicitud y crear material automáticamente
   const aprobarSolicitud = async (solicitudId) => {
     try {
-      const res = await fetch(`${API_URL}/aprobar-solicitud/${solicitudId}`, {
+      const res = await fetch('${API_URL}/aprobar-solicitud/${solicitudId}', {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ estado: "Aprobado" }),
@@ -104,7 +104,7 @@ const SolicitudMaterial = () => {
         obtenerSolicitudes();
       } else {
         const errorData = await res.json();
-        alert(`Error: ${errorData.error}`);
+        alert('Error: ${errorData.error}');
       }
     } catch (error) {
       console.error("Error al aprobar la solicitud", error);
@@ -114,7 +114,7 @@ const SolicitudMaterial = () => {
   // Rechazar solicitud
   const rechazarSolicitud = async (solicitudId) => {
     try {
-      const res = await fetch(`${API_URL}/modificarsolicitud/${solicitudId}`, {
+      const res = await fetch('${API_URL}/modificarsolicitud/${solicitudId} ', {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ estado: "Rechazado" }),
@@ -125,7 +125,7 @@ const SolicitudMaterial = () => {
         obtenerSolicitudes();
       } else {
         const errorData = await res.json();
-        alert(`Error: ${errorData.error}`);
+        alert('Error: ${errorData.error}');
       }
     } catch (error) {
       console.error("Error al rechazar la solicitud", error);
@@ -143,26 +143,13 @@ const SolicitudMaterial = () => {
           <div className="fila">
             <div className="campo">
               <label>Trabajador:</label>
-              <select
-                value={trabajadorId}
-                onChange={(e) => setTrabajadorId(e.target.value)}
-                required
-              >
+              <select value={trabajadorId} onChange={(e) => setTrabajadorId(e.target.value)}>
                 <option value="">Seleccione un trabajador</option>
-                {trabajadores
-                  .filter((trabajador) => {
-                    // Si el rol es 4, solo mostrar el usuario actual
-                    if (rol_id === "4") {
-                      const usuario_id = localStorage.getItem("usuario_id");
-                      return trabajador.id === parseInt(usuario_id, 10);
-                    }
-                    return true; // Mostrar todos los trabajadores para otros roles
-                  })
-                  .map((trabajador) => (
-                    <option key={trabajador.id} value={trabajador.id}>
-                      {trabajador.nombre} {trabajador.apellido}
-                    </option>
-                  ))}
+                {trabajadores.map((trabajador) => (
+                  <option key={trabajador.id} value={trabajador.id}>
+                    {trabajador.nombre} {trabajador.apellido}
+                  </option>
+                ))}
               </select>
             </div>
 
