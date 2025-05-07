@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import MenuLateral from "./menulateral";
 
-const API_URL = "http://127.0.0.1:5000/api/materiales";
+const API_URL = "https://gestordeobras-3.onrender.com/api/materiales";
 
 const Materiales = () => {
     const [materiales, setMateriales] = useState([]);
@@ -29,7 +29,7 @@ const Materiales = () => {
     };
     const obtenerZonas = async () => {
       try {
-        const response = await fetch("http://127.0.0.1:5000/api/zonas/mostrarzonas");
+        const response = await fetch("https://gestordeobras-3.onrender.com/api/zonas/mostrarzonas");
         const data = await response.json();
         console.log("Zonas obtenidas:", data); // <-- Agregado para depuración
         setZonas(data);
