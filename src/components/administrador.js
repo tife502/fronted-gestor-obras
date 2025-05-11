@@ -17,8 +17,6 @@ function Administrador() {
 
  const rolId = localStorage.getItem("rol_id");
  const userId = localStorage.getItem("id");
- console.log('rolId:', rolId);  
- console.log('userId:', userId);
  
 
  const esAdmin = rolId === "1";  
@@ -31,12 +29,10 @@ function Administrador() {
       
       const rolId = localStorage.getItem("rol_id");
       const userId = localStorage.getItem("id");
-      console.log('rolId:', rolId); 
       console.log('userId:', userId);
 
       
       const responseUsuarios = await axios.get("http://localhost:5000/api/usuarios/mostrarusuarios");
-      console.log("Usuarios obtenidos:", responseUsuarios.data); 
 
       // Si es un administrador (rolId == 1), carga todos los usuarios
       // Si no es admin, solo muestra el usuario correspondiente al userId
@@ -49,7 +45,6 @@ function Administrador() {
 
      
       const responseZonas = await axios.get("http://localhost:5000/api/zonas/mostrarzonas");
-      console.log("Zonas obtenidas:", responseZonas.data); 
       setZonas(responseZonas.data);
       
     } catch (error) {
@@ -205,10 +200,12 @@ function Administrador() {
                           ))}
                         </select>
                       </td>
-                      <td>
-                        <button onClick={() => guardarCambios(usuario.id)}>Guardar</button>
-                        <button onClick={() => setEditUser(null)}>Cancelar</button>
-                      </td>
+                      {rolId === "1" && (
+                        <td>
+                          <button onClick={() => guardarCambios(usuario.id)}>Guardar</button>
+                          <button onClick={() => setEditUser(null)}>Cancelar</button>
+                        </td>
+                      )}
                     </>
                   ) : (
                     <>
@@ -217,20 +214,16 @@ function Administrador() {
                       <td>{usuario.email}</td>
                       <td>{usuario.rol}</td>
                       <td>{usuario.id_zona ? usuario.id_zona : ""}</td>
-                      {esAdmin ? (
-                      <>
-                        <td>
-                          <button onClick={() => setEditUser(usuario)}>Editar</button>
-                        </td>
-                        <td>
-                          <button onClick={() => eliminarUsuario(usuario.id)}>Eliminar</button>
-                        </td>
-                      </>
-                    ) : (
-                      <>
-                        <td colSpan="2">Sin permisos</td>
-                      </>
-                    )}
+                      {rolId === "1" && (
+                        <>
+                          <td>
+                            <button onClick={() => setEditUser(usuario)}>Editar</button>
+                          </td>
+                          <td>
+                            <button onClick={() => eliminarUsuario(usuario.id)}>Eliminar</button>
+                          </td>
+                        </>
+                      )}
                     </>
                   )}
                 </tr>
