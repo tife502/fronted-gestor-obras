@@ -13,7 +13,7 @@ function Recovery() {
     const handleRequestReset = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.post("http://localhost:5000/api/usuarios/recuperar", { email });
+            const response = await axios.post("https://gestordeobras-3.onrender.com/api/usuarios/recuperar", { email });
             alert(response.data.mensaje || response.data.error);
             setStep(2); // Si todo sale bien, avanzar al siguiente paso
         } catch (error) {
@@ -32,7 +32,7 @@ function Recovery() {
         }
 
         try {
-            const response = await axios.post("http://localhost:5000/api/usuarios/resetear", {
+            const response = await axios.post("https://gestordeobras-3.onrender.com/api/usuarios/resetear", {
                 email,
                 password,
                 token,

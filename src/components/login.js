@@ -15,7 +15,7 @@ function Login() {
 
     const loginUsuario = async () => {
         try {
-            const response = await axios.post("http://127.0.0.1:5000/api/usuarios/login", { 
+            const response = await axios.post("https://gestordeobras-3.onrender.com/api/usuarios/login", { 
                 email: correo, 
                 password: contraseña 
             });
@@ -76,7 +76,7 @@ function Login() {
             return;
         }
         try {
-            const response = await axios.post('http://localhost:5000/api/usuarios/registro', {
+            const response = await axios.post('https://gestordeobras-3.onrender.com/api/usuarios/registro', {
                 nombre,
                 email: correo,
                 password: contraseña

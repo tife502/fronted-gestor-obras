@@ -20,7 +20,7 @@ function Asistencia() {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/asistencia/checkin", {
+      const res = await fetch("https://gestordeobras-3.onrender.com/api/asistencia/checkin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ trabajador_id: trabajadorId, ...ubicacion }),
@@ -40,7 +40,7 @@ function Asistencia() {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/asistencia/checkout", {
+      const res = await fetch("https://gestordeobras-3.onrender.com/api/asistencia/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ trabajador_id: trabajadorId, ...ubicacion }),
@@ -55,7 +55,7 @@ function Asistencia() {
 
   const obtenerAsistencias = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/asistencia/todas");
+      const res = await fetch("https://gestordeobras-3.onrender.com/api/asistencia/todas");
       const data = await res.json();
       setAsistencias(data);
     } catch (error) {

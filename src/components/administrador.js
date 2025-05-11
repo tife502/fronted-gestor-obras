@@ -33,6 +33,7 @@ function Administrador() {
 
       
       const responseUsuarios = await axios.get("http://localhost:5000/api/usuarios/mostrarusuarios");
+      console.log("Usuarios obtenidos:", responseUsuarios.data); 
 
       // Si es un administrador (rolId == 1), carga todos los usuarios
       // Si no es admin, solo muestra el usuario correspondiente al userId
@@ -62,7 +63,7 @@ function Administrador() {
   // Función para eliminar usuario
   const eliminarUsuario = async (id) => {
     try {
-      await axios.delete(`http://localhost:5000/api/usuarios/eliminarusuario/${id}`);
+      await axios.delete(`https://gestordeobras-3.onrender.com/api/usuarios/eliminarusuario/${id}`);
       setUsuarios((prevUsuarios) => prevUsuarios.filter((usuario) => usuario.id !== id));
     } catch (error) {
       console.error("Error al eliminar usuario:", error.response?.data || error.message);
@@ -79,7 +80,7 @@ function Administrador() {
     if (!editUser) return;
 
     try {
-      const response = await fetch(`http://127.0.0.1:5000/api/usuarios/modificarusuario/${id}`, {
+      const response = await fetch(`https://gestordeobras-3.onrender.com/api/usuarios/modificarusuario/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

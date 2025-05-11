@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import MenuLateral from "./menulateral";
 import "../estilos/obras.css";
 
+const API_URL = "http://localhost:5000/api/solicitudes";
+
 const SolicitudMaterial = () => {
   const [solicitudes, setSolicitudes] = useState([]);
   const [trabajadores, setTrabajadores] = useState([]);
@@ -56,7 +58,7 @@ const SolicitudMaterial = () => {
   // Obtener zonas
   const obtenerZonas = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:5000/api/zonas/mostrarzonas");
+      const res = await fetch("https://gestordeobras-3.onrender.com/api/zonas/mostrarzonas");
       const data = await res.json();
       setZonas(data);
     } catch (error) {
@@ -67,7 +69,7 @@ const SolicitudMaterial = () => {
   // Obtener trabajadores
   const obtenerTrabajadores = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/usuarios/mostrarusuarios");
+      const res = await fetch("https://gestordeobras-3.onrender.com/api/usuarios/mostrarusuarios");
       const data = await res.json();
       setTrabajadores(data);
     } catch (error) {

@@ -16,15 +16,15 @@ const Tareas = () => {
 
   const rol_id = localStorage.getItem("rol_id");
   useEffect(() => {
-    fetch("http://localhost:5000/api/tareas/obtenertareas")
+    fetch("https://gestordeobras-3.onrender.com/api/tareas/obtenertareas")
       .then((res) => res.json())
       .then(setTareas);
 
-    fetch("http://localhost:5000/api/usuarios/mostrarusuarios")
+    fetch("https://gestordeobras-3.onrender.com/api/usuarios/mostrarusuarios")
       .then((res) => res.json())
       .then(setTrabajadores);
 
-    fetch("http://localhost:5000/api/zonas/mostrarzonas")
+    fetch("https://gestordeobras-3.onrender.com/api/zonas/mostrarzonas")
       .then((res) => res.json())
       .then(setZonas);
   }, []);
@@ -69,7 +69,7 @@ const Tareas = () => {
       id_zona: idZona
     };
 
-    fetch("http://localhost:5000/api/tareas/creartareas", {
+    fetch("https://gestordeobras-3.onrender.com/api/tareas/creartareas", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(nuevaTarea),
@@ -79,7 +79,7 @@ const Tareas = () => {
       .catch((error) => console.error("Error al crear tarea:", error));
   };
   const eliminarTarea = (id) => {
-    fetch(`http://localhost:5000/api/tareas/eliminartarea/${id}`, {
+    fetch(`https://gestordeobras-3.onrender.com/api/tareas/eliminartarea/${id}`, {
       method: "DELETE",
     })
       .then((res) => res.json())
@@ -117,7 +117,7 @@ const Tareas = () => {
     // Verifica si la imagen está cargada
     if (tareaEditada.evidencia) {
       // Enviar la imagen al backend (como base64)
-      fetch(`http://localhost:5000/api/tareas/modificartarea/${id}`, {
+      fetch(`https://gestordeobras-3.onrender.com/api/tareas/modificartarea/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -158,7 +158,7 @@ const Tareas = () => {
   
     
     try {
-      const response = await fetch(`http://localhost:5000/api/tareas/modificartarea/${tarea.id}`, {
+      const response = await fetch(`https://gestordeobras-3.onrender.com/api/tareas/modificartarea/${tarea.id}`, {
         method: 'PUT', 
         headers: {
           'Content-Type': 'application/json',
