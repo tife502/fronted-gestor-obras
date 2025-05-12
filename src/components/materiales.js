@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import MenuLateral from "./menulateral";
 
-const API_URL = "https://gestordeobras-3.onrender.com/api/materiales";
+const API_URL = "http://localhost:5000/api/materiales";
 
 const Materiales = () => {
     const [materiales, setMateriales] = useState([]);

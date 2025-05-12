@@ -4,7 +4,6 @@ import { useUser } from "../context/userContext";
 import axios from "axios";
 import "../estilos/login.css";
 
-
 function Login() {
     const [nombre, setNombre] = useState('');
     const [correo, setCorreo] = useState("");
@@ -15,15 +14,13 @@ function Login() {
 
     const loginUsuario = async () => {
         try {
-            const response = await axios.post("https://gestordeobras-3.onrender.com/api/usuarios/login", { 
+            const response = await axios.post("http://localhost:5000/api/usuarios/login", { 
                 email: correo, 
                 password: contraseña 
             });
-            console.log('Respuesta del login:', response.data);  
             return response.data;  
         } catch (error) {
             if (error.response) {
-                console.log("Error:", error.response.data);
                 if (error.response.status === 404) {
                     alert("Usuario no registrado");
                     window.location.reload();
@@ -47,27 +44,17 @@ function Login() {
         
         const data = await loginUsuario();
         
-        console.log("Datos de login:", data);  
-        
         if (data && data.token && data.rol_id && data.id) {
             localStorage.setItem("token", data.token);
             localStorage.setItem("rol_id", data.rol_id);  
             localStorage.setItem("id", data.id);  
     
-            console.log("Datos guardados en localStorage:");
-            console.log('token:', localStorage.getItem('token'));
-            console.log('rol_id:', localStorage.getItem('rol_id'));
-            console.log('id:', localStorage.getItem('id'));
-    
             setUserId(data.id);  
             navigate("/administrador");  
         } else {
-            console.error("Error de autenticación: datos incompletos");
             alert("Datos incompletos, por favor intenta de nuevo.");
         }
     };
-    
-    
 
     const handleSubmitRegistro = async (event) => {
         event.preventDefault();
@@ -76,7 +63,7 @@ function Login() {
             return;
         }
         try {
-            const response = await axios.post('https://gestordeobras-3.onrender.com/api/usuarios/registro', {
+            await axios.post('http://localhost:5000/api/usuarios/registro', {
                 nombre,
                 email: correo,
                 password: contraseña
@@ -86,12 +73,10 @@ function Login() {
             setCorreo("");
             setContraseña("");
         } catch (error) {
-            console.error("Error al registrar el usuario:", error);
             alert("Hubo un error al registrar el usuario. Inténtalo de nuevo.");
         }
     };
-    
-    
+
     return (
         <div className="container">
             <div className="forms-container">
@@ -99,7 +84,6 @@ function Login() {
                     {isSignIn ? (
                         <form onSubmit={handleSubmit}>
                             <h2>Login</h2>
-                            <p>Don't have an account yet? <a href="#" onClick={() => setIsSignIn(false)}>Sign Up</a></p>
                             <div className="input-container">
                                 <label htmlFor="email">Email Address</label>
                                 <input 
@@ -113,7 +97,7 @@ function Login() {
                             <div className="input-container">
                                 <div className="forget">
                                     <label htmlFor="password">Password</label>
-                                    <a href="/recovery Password">Forget Password</a>
+                                    <a href="/recovery-password">Forget Password</a>
                                 </div>
                                 <input 
                                     id="password" 
@@ -123,17 +107,12 @@ function Login() {
                                     onChange={(e) => setContraseña(e.target.value)} 
                                 />
                             </div>
-                            <div className="remember-me">
-                                <input type="checkbox" id="checkbox" />
-                                <label htmlFor="checkbox">Remember me</label>
-                            </div>
                             <button type="submit">LOGIN</button>
                         </form>
                     ) : (
                         <form onSubmit={handleSubmitRegistro}>
                             <h2>REGISTER</h2>
-                            <p>Already registered? <a href="#" onClick={() => setIsSignIn(true)}>Sign In</a></p>
-    
+                            <p>Already registered? <button type="button" onClick={() => setIsSignIn(true)}>Sign In</button></p>
                             <div className="input-container">
                                 <label htmlFor="name">Name</label>
                                 <input 
@@ -144,7 +123,6 @@ function Login() {
                                     onChange={(e) => setNombre(e.target.value)} 
                                 />
                             </div>
-
                             <div className="input-container">
                                 <label htmlFor="email">Email</label>
                                 <input 
@@ -155,7 +133,6 @@ function Login() {
                                     onChange={(e) => setCorreo(e.target.value)} 
                                 />
                             </div>
-
                             <div className="input-container">
                                 <label htmlFor="password">Password</label>
                                 <input 
@@ -166,7 +143,6 @@ function Login() {
                                     onChange={(e) => setContraseña(e.target.value)} 
                                 />
                             </div>
-
                             <button className="btn-register" type="submit">REGISTER</button>
                         </form>
                     )}

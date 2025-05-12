@@ -47,7 +47,7 @@ const rol_id = localStorage.getItem("rol_id");
 
   const obtenerZonas = async () => {
     try {
-      const response = await fetch("https://gestordeobras-3.onrender.com/api/zonas/mostrarzonas");
+      const response = await fetch("http://localhost:5000/api/zonas/mostrarzonas");
       const data = await response.json();
       console.log("Zonas obtenidas:", data);
       setZonas(data);
@@ -64,7 +64,7 @@ const rol_id = localStorage.getItem("rol_id");
     }
 
     try {
-      const response = await fetch("https://gestordeobras-3.onrender.com/api/zonas/crearzonas", {
+      const response = await fetch("http://localhost:5000/api/zonas/crearzonas", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ nombre, descripcion, ubicacion, finalizada, avance }),
@@ -84,7 +84,7 @@ const rol_id = localStorage.getItem("rol_id");
 
   const eliminarZona = async (id) => {
     try {
-      await fetch(`https://gestordeobras-3.onrender.com/api/zonas/eliminarzonas/${id}`, { method: "DELETE" });
+      await fetch(`http://localhost:5000/api/zonas/eliminarzonas/${id}`, { method: "DELETE" });
       obtenerZonas();
     } catch (error) {
       console.error("Error al eliminar zona:", error);
@@ -109,7 +109,7 @@ const rol_id = localStorage.getItem("rol_id");
       console.log("ID de la zona:", id);
       console.log("Datos a enviar:", zonaEditada);
   
-      const response = await fetch(`https://gestordeobras-3.onrender.com/api/zonas/modificarzonas/${id}`, {
+      const response = await fetch(`http://localhost:5000/api/zonas/modificarzonas/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(zonaEditada),

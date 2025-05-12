@@ -16,48 +16,64 @@ const Tareas = () => {
 
   const rol_id = localStorage.getItem("rol_id");
   useEffect(() => {
-    fetch("https://gestordeobras-3.onrender.com/api/tareas/obtenertareas")
+    fetch("http://localhost:5000/api/tareas/obtenertareas")
       .then((res) => res.json())
       .then(setTareas);
 
-    fetch("https://gestordeobras-3.onrender.com/api/usuarios/mostrarusuarios")
+    fetch("http://localhost:5000/api/usuarios/mostrarusuarios")
       .then((res) => res.json())
       .then(setTrabajadores);
 
-    fetch("https://gestordeobras-3.onrender.com/api/zonas/mostrarzonas")
+    fetch("http://localhost:5000/api/zonas/mostrarzonas")
       .then((res) => res.json())
       .then(setZonas);
   }, []);
 
   const handleImageChange = (e, tareaId) => {
-    const files = Array.from(e.target.files).slice(0, 3);
+    const files = Array.from(e.target.files).slice(0, 3); // Limitar a 3 archivos
     const readers = [];
-    const newEvidencias = []; 
-    
+    const newEvidencias = [];
+
     files.forEach((file, index) => {
+      // Validar tipo de archivo
+      if (!file.type.startsWith("image/")) {
+        alert("Solo se permiten imágenes.");
+        return;
+      }
+
+      // Validar tamaño de archivo (ejemplo: 2MB)
+      if (file.size > 2 * 1024 * 1024) {
+        alert("El tamaño máximo permitido es de 2MB.");
+        return;
+      }
+
       const reader = new FileReader();
-      
+
       reader.onloadend = () => {
         newEvidencias.push(reader.result);
         if (newEvidencias.length === files.length) {
-          
           const updatedTareas = tareas.map((tarea) => {
             if (tarea.id === tareaId) {
-              
-              const updatedEvidencias = [...JSON.parse(tarea.evidencia || '[]'), ...newEvidencias];
+              const updatedEvidencias = [
+                ...JSON.parse(tarea.evidencia || "[]"),
+                ...newEvidencias,
+              ];
               return { ...tarea, evidencia: JSON.stringify(updatedEvidencias) };
             }
             return tarea;
           });
-          setTareas(updatedTareas); 
+          setTareas(updatedTareas);
         }
       };
-      
+
+      reader.onerror = () => {
+        alert("Error al leer el archivo.");
+      };
+
       reader.readAsDataURL(file);
       readers.push(reader);
     });
   };
-  
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -69,7 +85,7 @@ const Tareas = () => {
       id_zona: idZona
     };
 
-    fetch("https://gestordeobras-3.onrender.com/api/tareas/creartareas", {
+    fetch("http://localhost:5000/api/tareas/creartareas", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(nuevaTarea),
@@ -79,7 +95,7 @@ const Tareas = () => {
       .catch((error) => console.error("Error al crear tarea:", error));
   };
   const eliminarTarea = (id) => {
-    fetch(`https://gestordeobras-3.onrender.com/api/tareas/eliminartarea/${id}`, {
+    fetch(`http://localhost:5000/api/tareas/eliminartarea/${id}`, {
       method: "DELETE",
     })
       .then((res) => res.json())
@@ -92,23 +108,37 @@ const Tareas = () => {
   };
   
   const editarTarea = (tarea) => {
-   
     setDescripcion(tarea.descripcion);
     setEstado(tarea.estado);
     setTrabajadorId(tarea.trabajador_id);
     setIdZona(tarea.id_zona);
     setEvidencias(() => {
+      if (!tarea.evidencia) {
+        return []; // Si no hay evidencia, devuelve un array vacío
+      }
+
       try {
-        return JSON.parse(tarea.evidencia);
+        return JSON.parse(tarea.evidencia); // Intenta parsear el JSON
       } catch {
-        return [tarea.evidencia];
+        return [tarea.evidencia]; // Si falla, envuelve el valor en un array
       }
     });
     setMensaje(`Editando tarea ID ${tarea.id}`);
-    
   };
+
   const handleEditar = (tarea) => {
-    setTareaEditando(tarea.id);  
+    if (tareaEditando === tarea.id) {
+      setTareaEditando(null); // Si ya está en edición, cancela la edición
+      setDescripcion(""); // Limpia los estados locales
+      setEstado("Pendiente");
+      setTrabajadorId("");
+      setIdZona("");
+      setEvidencias([]);
+      setMensaje("");
+    } else {
+      editarTarea(tarea); // Prepara los datos de la tarea
+      setTareaEditando(tarea.id); // Establece la tarea en edición
+    }
   };
   
   const handleGuardar = (id) => {
@@ -117,7 +147,7 @@ const Tareas = () => {
     // Verifica si la imagen está cargada
     if (tareaEditada.evidencia) {
       // Enviar la imagen al backend (como base64)
-      fetch(`https://gestordeobras-3.onrender.com/api/tareas/modificartarea/${id}`, {
+      fetch(`http://localhost:5000/api/tareas/modificartarea/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -158,7 +188,7 @@ const Tareas = () => {
   
     
     try {
-      const response = await fetch(`https://gestordeobras-3.onrender.com/api/tareas/modificartarea/${tarea.id}`, {
+      const response = await fetch(`http://localhost:5000/api/tareas/modificartarea/${tarea.id}`, {
         method: 'PUT', 
         headers: {
           'Content-Type': 'application/json',
@@ -385,15 +415,13 @@ const Tareas = () => {
   </button>
 </td>
 
-
-
 <td>
   {(rol_id === "2" || rol_id === "3") && (
     <>
       {tareaEditando === tarea.id ? (
         <button onClick={() => handleGuardar(tarea.id)}>Guardar</button>
       ) : (
-        <button onClick={() => setTareaEditando(tarea.id)}>Editar</button>
+        <button onClick={() => handleEditar(tarea)}>Editar</button>
       )}
     </>
   )}

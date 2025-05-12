@@ -2,7 +2,37 @@ import React, { useEffect, useState } from "react";
 import MenuLateral from "./menulateral";
 import "../estilos/obras.css";
 
-const API_URL = "http://localhost:5000/api/solicitudes";
+const TablaSolicitudes = ({ titulo, solicitudes, trabajadores, zonas, filtro }) => (
+  <>
+    <h3>{titulo}</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Trabajador</th>
+          <th>Cantidad</th>
+          <th>Zona</th>
+          <th>Nombre del Material</th>
+          <th>Estado</th>
+          <th>Fecha Solicitud</th>
+        </tr>
+      </thead>
+      <tbody>
+        {solicitudes.filter(filtro).map((solicitud) => (
+          <tr key={solicitud.id}>
+            <td>{solicitud.id}</td>
+            <td>{trabajadores.find(t => t.id === solicitud.trabajador_id)?.nombre || "Desconocido"}</td>
+            <td>{solicitud.cantidad}</td>
+            <td>{zonas.find(z => z.id === solicitud.id_zona)?.nombre || "Desconocida"}</td>
+            <td>{solicitud.nombre}</td>
+            <td>{solicitud.estado}</td>
+            <td>{new Date(solicitud.fecha_solicitud).toLocaleString()}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  </>
+);
 
 const SolicitudMaterial = () => {
   const [solicitudes, setSolicitudes] = useState([]);
@@ -16,9 +46,6 @@ const SolicitudMaterial = () => {
   const [unidadesMedida, setUnidadesMedida] = useState([]);
   const [unidadMedida, setUnidadMedida] = useState("");
 
-
-
-
   console.log("Solcitudes", solicitudes);
 
   const rol_id = localStorage.getItem("rol_id");
@@ -31,7 +58,6 @@ const SolicitudMaterial = () => {
     obtenerMateriales();
     obtenerUnidadesMedida();
   }, []);
-
 
   const obtenerUnidadesMedida = async () => {
     try {
@@ -58,7 +84,7 @@ const SolicitudMaterial = () => {
   // Obtener zonas
   const obtenerZonas = async () => {
     try {
-      const res = await fetch("https://gestordeobras-3.onrender.com/api/zonas/mostrarzonas");
+      const res = await fetch("http://localhost:5000/api/zonas/mostrarzonas");
       const data = await res.json();
       setZonas(data);
     } catch (error) {
@@ -69,7 +95,7 @@ const SolicitudMaterial = () => {
   // Obtener trabajadores
   const obtenerTrabajadores = async () => {
     try {
-      const res = await fetch("https://gestordeobras-3.onrender.com/api/usuarios/mostrarusuarios");
+      const res = await fetch("http://localhost:5000/api/usuarios/mostrarusuarios");
       const data = await res.json();
       setTrabajadores(data);
     } catch (error) {
@@ -109,7 +135,6 @@ const SolicitudMaterial = () => {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(nuevaSolicitud),
-        
       });
 
       if (res.ok) {
@@ -259,91 +284,29 @@ const SolicitudMaterial = () => {
         {/* Renderizar solicitudes por tipo */}
         {rol_id === "2" && (
           <>
-            <h3>Solicitudes de Materiales Existentes</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Trabajador</th>
-                  <th>Cantidad</th>
-                  <th>Zona</th>
-                  <th>Nombre del Material</th>
-                  <th>Estado</th>
-                  <th>Fecha Solicitud</th>
-                </tr>
-              </thead>
-              <tbody>
-                {solicitudes.filter((s) => s.estado === "Pendiente" && s.cantidad_pendiente > 0)
-                .map((solicitud) => (
-                  <tr key={solicitud.id}>
-                    <td>{solicitud.id}</td>
-                    <td>{trabajadores.find(t => t.id === solicitud.trabajador_id)?.nombre || "Desconocido"}</td>
-                    <td>{solicitud.cantidad}</td>
-                    <td>{zonas.find(z => z.id === solicitud.id_zona)?.nombre || "Desconocida"}</td>
-                    <td>{solicitud.nombre}</td>
-                    <td>{solicitud.estado}</td>
-                    <td>{new Date(solicitud.fecha_solicitud).toLocaleString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <TablaSolicitudes
+              titulo="Solicitudes de Materiales Existentes"
+              solicitudes={solicitudes}
+              trabajadores={trabajadores}
+              zonas={zonas}
+              filtro={(s) => s.estado === "Pendiente" || s.cantidad_pendiente > 0}
+            />
 
-            <h3>Solicitudes de Nuevos Materiales</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Trabajador</th>
-                  <th>Cantidad</th>
-                  <th>Zona</th>
-                  <th>Nombre del Material</th>
-                  <th>Estado</th>
-                  <th>Fecha Solicitud</th>
-                </tr>
-              </thead>
-              <tbody>
-                {solicitudes.filter((s) => s.estado === "Pendiente" && s.cantidad_pendiente === 0)
-                .map((solicitud) => (
-                  <tr key={solicitud.id}>
-                    <td>{solicitud.id}</td>
-                    <td>{trabajadores.find(t => t.id === solicitud.trabajador_id)?.nombre || "Desconocido"}</td>
-                    <td>{solicitud.cantidad}</td>
-                    <td>{zonas.find(z => z.id === solicitud.id_zona)?.nombre || "Desconocida"}</td>
-                    <td>{solicitud.nombre}</td>
-                    <td>{solicitud.estado}</td>
-                    <td>{new Date(solicitud.fecha_solicitud).toLocaleString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <TablaSolicitudes
+              titulo="Solicitudes de Nuevos Materiales"
+              solicitudes={solicitudes}
+              trabajadores={trabajadores}
+              zonas={zonas}
+              filtro={(s) => s.estado === "Pendiente" || s.cantidad_pendiente === 0}
+            />
 
-            <h3>Solicitudes Aprobadas Parcialmente</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>ID</th>
-                  <th>Trabajador</th>
-                  <th>Cantidad</th>
-                  <th>Zona</th>
-                  <th>Nombre del Material</th>
-                  <th>Estado</th>
-                  <th>Fecha Solicitud</th>
-                </tr>
-              </thead>
-              <tbody>
-                {solicitudes.filter((s) => s.estado === "Aprobado Parcialmente").map((solicitud) => (
-                  <tr key={solicitud.id}>
-                    <td>{solicitud.id}</td>
-                    <td>{trabajadores.find(t => t.id === solicitud.trabajador_id)?.nombre || "Desconocido"}</td>
-                    <td>{solicitud.cantidad}</td>
-                    <td>{zonas.find(z => z.id === solicitud.id_zona)?.nombre || "Desconocida"}</td>
-                    <td>{solicitud.nombre}</td>
-                    <td>{solicitud.estado}</td>
-                    <td>{new Date(solicitud.fecha_solicitud).toLocaleString()}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <TablaSolicitudes
+              titulo="Solicitudes Aprobadas Parcialmente"
+              solicitudes={solicitudes}
+              trabajadores={trabajadores}
+              zonas={zonas}
+              filtro={(s) => s.estado === "Aprobado Parcialmente"}
+            />
           </>
         )}
       </div>
