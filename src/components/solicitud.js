@@ -289,7 +289,7 @@ const SolicitudMaterial = () => {
               solicitudes={solicitudes}
               trabajadores={trabajadores}
               zonas={zonas}
-              filtro={(s) => s.estado === "Pendiente" || s.cantidad_pendiente > 0}
+              filtro={(s) => s.estado === "Pendiente"}
             />
 
             <TablaSolicitudes
@@ -297,7 +297,7 @@ const SolicitudMaterial = () => {
               solicitudes={solicitudes}
               trabajadores={trabajadores}
               zonas={zonas}
-              filtro={(s) => s.estado === "Pendiente" || s.cantidad_pendiente === 0}
+              filtro={(s) => s.estado === "Pendiente"}
             />
 
             <TablaSolicitudes
