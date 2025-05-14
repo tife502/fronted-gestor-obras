@@ -16,18 +16,32 @@ const Tareas = () => {
 
   const rol_id = localStorage.getItem("rol_id");
   useEffect(() => {
+  const userId = localStorage.getItem("id");
+  const rolId = localStorage.getItem("rol_id");
+
+  // Si es un trabajador (rol_id == 2 por ejemplo), solo trae sus tareas
+  if (rolId === "4") {
+    fetch(`http://localhost:5000/api/tareas/obtenertareas/${userId}`)
+      .then((res) => res.json())
+      .then(setTareas)
+      .catch((err) => console.error("Error al obtener tareas del trabajador:", err));
+  } else {
+    // Si es un administrador, trae todas las tareas
     fetch("http://localhost:5000/api/tareas/obtenertareas")
       .then((res) => res.json())
-      .then(setTareas);
+      .then(setTareas)
+      .catch((err) => console.error("Error al obtener tareas:", err));
+  }
 
-    fetch("http://localhost:5000/api/usuarios/mostrarusuarios")
-      .then((res) => res.json())
-      .then(setTrabajadores);
+  fetch("http://localhost:5000/api/usuarios/mostrarusuarios")
+    .then((res) => res.json())
+    .then(setTrabajadores);
 
-    fetch("http://localhost:5000/api/zonas/mostrarzonas")
-      .then((res) => res.json())
-      .then(setZonas);
-  }, []);
+  fetch("http://localhost:5000/api/zonas/mostrarzonas")
+    .then((res) => res.json())
+    .then(setZonas);
+}, []);
+
 
   const handleImageChange = (e, tareaId) => {
     const files = Array.from(e.target.files).slice(0, 3); // Limitar a 3 archivos
@@ -426,7 +440,7 @@ const Tareas = () => {
     </>
   )}
 
-  {(rol_id === "2" || rol_id === "3" || rol_id === "4") && tarea.estado !== "Completada" && (
+  { tarea.estado !== "Completada" && (
     <button onClick={() => cambiarEstado(tarea)} style={{ marginLeft: "10px" }}>
       Cambiar Estado
     </button>
@@ -456,6 +470,7 @@ const Tareas = () => {
 };
 
 export default Tareas;
+
 
 
 

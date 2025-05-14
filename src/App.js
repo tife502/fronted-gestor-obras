@@ -9,6 +9,7 @@ import Asistencia from './components/asistencia';
 import Materiales from './components/materiales';
 import Zonas from './components/zonas';
 import Tareas from './components/tareas';
+import Chat from './components/chat';
 
 
 function App() {
@@ -24,7 +25,7 @@ function App() {
           <Route  path="/solicitudes" element={<SolicitudMaterial />} />
           <Route  path="/asistencia" element={<Asistencia />} />
           <Route  path="/tareas" element={<Tareas />} />
-          
+          <Route  path="/chats" element={<Chat />} />
           <Route  path="/*" element={<Login />} />
 
         </Routes>
