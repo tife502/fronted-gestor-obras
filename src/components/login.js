@@ -48,7 +48,8 @@ function Login() {
             localStorage.setItem("token", data.token);
             localStorage.setItem("rol_id", data.rol_id);  
             localStorage.setItem("id", data.id);  
-    
+            localStorage.setItem("id_zona", data.id_zona); 
+
             setUserId(data.id);  
             navigate("/administrador");  
         } else {

@@ -2,9 +2,10 @@ import React, { useEffect, useState } from "react";
 import MenuLateral from "./menulateral";
 import "../estilos/obras.css";
 
-const TablaSolicitudes = ({ titulo, solicitudes, trabajadores, zonas, filtro }) => (
-  <>
-    <h3>{titulo}</h3>
+// Componente para mostrar cada lista de solicitudes
+const ListaSolicitudes = ({ solicitudes, esNuevo, acciones, materiales, unidades }) => (
+  <div>
+    <h3>{esNuevo ? "Solicitudes de Materiales Nuevos" : "Solicitudes de Materiales Existentes"}</h3>
     <table>
       <thead>
         <tr>
@@ -12,303 +13,468 @@ const TablaSolicitudes = ({ titulo, solicitudes, trabajadores, zonas, filtro }) 
           <th>Trabajador</th>
           <th>Cantidad</th>
           <th>Zona</th>
-          <th>Nombre del Material</th>
+          <th>{esNuevo ? "Nombre del Material" : "Material"}</th>
+          <th>Unidad De Medida</th>
+          <th>Fecha</th>
           <th>Estado</th>
-          <th>Fecha Solicitud</th>
+          {acciones && <th>Acciones</th>}
         </tr>
       </thead>
       <tbody>
-        {solicitudes.filter(filtro).map((solicitud) => (
-          <tr key={solicitud.id}>
-            <td>{solicitud.id}</td>
-            <td>{trabajadores.find(t => t.id === solicitud.trabajador_id)?.nombre || "Desconocido"}</td>
-            <td>{solicitud.cantidad}</td>
-            <td>{zonas.find(z => z.id === solicitud.id_zona)?.nombre || "Desconocida"}</td>
-            <td>{solicitud.nombre}</td>
-            <td>{solicitud.estado}</td>
-            <td>{new Date(solicitud.fecha_solicitud).toLocaleString()}</td>
-          </tr>
-        ))}
+        {solicitudes.map((s) => {
+          // Buscar nombre del material y unidad si es existente
+          const material = materiales?.find(m => m.id === s.id_material);
+          const unidad = unidades?.find(u => u.id === (material ? material.id_unidad : s.id_unidad));
+          return (
+            <tr key={s.id_solicitud}>
+              <td>{s.id_solicitud}</td>
+              <td>{s.trabajador_nombre || s.id_usuario}</td>
+              <td>{s.cantidad}</td>
+              <td>{s.zona_nombre || s.id_zona}</td>
+              <td>
+                {esNuevo
+                  ? s.nombre_material
+                  : material ? material.nombre : s.id_material}
+              </td>
+              <td>
+                {esNuevo
+                  ? (unidades?.find(u => u.id === s.id_unidad)?.nombre || s.id_unidad)
+                  : unidad ? unidad.nombre : (material ? material.id_unidad : s.id_unidad)}
+              </td>
+              <td>{new Date(s.fecha_solicitud).toLocaleString()}</td>
+              <td>
+                {s.id_estado === 1
+                  ? "Pendiente"
+                  : s.id_estado === 2
+                  ? "Asignada"
+                  : s.id_estado === 3
+                  ? "Rechazada"
+                  : s.id_estado}
+              </td>
+              {acciones && s.id_estado === 1 && (
+                <td>
+                  <button onClick={() => acciones.onAsignar(s.id_solicitud)}>Asignar</button>
+                  <button onClick={() => acciones.onRechazar(s.id_solicitud)} style={{marginLeft: 8}}>Rechazar</button>
+                </td>
+              )}
+            </tr>
+          );
+        })}
       </tbody>
     </table>
-  </>
+  </div>
 );
 
+// Modal genérico reutilizable
+const Modal = ({ open, onClose, children }) => {
+  if (!open) return null;
+  return (
+    <div className="modal-backdrop">
+      <div className="modal-content">
+        <button className="modal-close" onClick={onClose}>X</button>
+        {children}
+      </div>
+    </div>
+  );
+};
+
 const SolicitudMaterial = () => {
+  // Estados generales
   const [solicitudes, setSolicitudes] = useState([]);
-  const [trabajadores, setTrabajadores] = useState([]);
-  const [zonas, setZonas] = useState([]);
   const [materiales, setMateriales] = useState([]);
+  const [zonas, setZonas] = useState([]);
+  const [unidades, setUnidades] = useState([]);
+  const [modalExistente, setModalExistente] = useState(false);
+  const [modalNuevo, setModalNuevo] = useState(false);
+
+  // Estados para órdenes de compra
+  const [modalOrdenes, setModalOrdenes] = useState(false);
+  const [ordenes, setOrdenes] = useState([]);
+
+  // Estados para formularios
   const [idMaterial, setIdMaterial] = useState("");
   const [cantidad, setCantidad] = useState("");
-  const [nombre, setNombre] = useState("");
   const [idZona, setIdZona] = useState("");
-  const [unidadesMedida, setUnidadesMedida] = useState([]);
-  const [unidadMedida, setUnidadMedida] = useState("");
+  const [nombreMaterial, setNombreMaterial] = useState("");
+  const [idUnidad, setIdUnidad] = useState("");
 
-  console.log("Solcitudes", solicitudes);
+  // Estado para mensajes de error
+  const [errorMensaje, setErrorMensaje] = useState("");
 
+  // Datos de usuario
   const rol_id = localStorage.getItem("rol_id");
   const user_id = localStorage.getItem("id");
+  const user_zona_id = localStorage.getItem("id_zona");
 
+  // Cargar datos iniciales
   useEffect(() => {
-    obtenerSolicitudes();
-    obtenerZonas();
-    obtenerTrabajadores();
-    obtenerMateriales();
-    obtenerUnidadesMedida();
+    fetch("http://localhost:5000/api/solicitudes/mostrarsolicitudes")
+      .then(res => res.json())
+      .then(setSolicitudes);
+    fetch("http://localhost:5000/api/materiales/listarmateriales")
+      .then(res => res.json())
+      .then(setMateriales);
+    fetch("http://localhost:5000/api/zonas/mostrarzonas")
+      .then(res => res.json())
+      .then(setZonas);
+    fetch("http://localhost:5000/api/unidades_medida/listarunidadesmedida")
+      .then(res => res.json())
+      .then(setUnidades);
+    fetchOrdenes();
   }, []);
 
-  const obtenerUnidadesMedida = async () => {
-    try {
-      const res = await fetch("http://localhost:5000/api/materiales/unidadesmedida");
+  // Filtrar zonas según rol
+  const zonasFiltradas = rol_id === "4"
+    ? zonas.filter(z => z.id === Number(user_zona_id))
+    : zonas;
+
+  // Acciones de solicitudes
+  const asignarSolicitud = async (id) => {
+    setErrorMensaje(""); // Limpia el error anterior
+    const res = await fetch(`http://localhost:5000/api/solicitudes/asignarsolicitud/${id}`, { method: "PUT" });
+    if (res.ok) {
+      fetch("http://localhost:5000/api/solicitudes/mostrarsolicitudes")
+        .then(res => res.json())
+        .then(setSolicitudes);
+    } else {
       const data = await res.json();
-      console.log("Unidades de medida:", data.unidades);
-      setUnidadesMedida(data.unidades);
-    } catch (error) {
-      console.error("Error al obtener unidades de medida:", error);
+      setErrorMensaje(data.error || "Error al asignar la solicitud");
     }
   };
-  // Obtener solicitudes
-  const obtenerSolicitudes = async () => {
-    try {
-      const res = await fetch("http://localhost:5000/api/solicitudes/mostrarsolicitudes");
-      const data = await res.json();
-      console.log("Solicitudes obtenidas:", data);
-      setSolicitudes(data);
-    } catch (error) {
-      console.error("Error al obtener solicitudes", error);
-    }
+  const rechazarSolicitud = async (id) => {
+    await fetch(`http://localhost:5000/api/solicitudes/rechazarsolicitud/${id}`, { method: "PUT" });
+    fetch("http://localhost:5000/api/solicitudes/mostrarsolicitudes")
+      .then(res => res.json())
+      .then(setSolicitudes);
   };
 
-  // Obtener zonas
-  const obtenerZonas = async () => {
-    try {
-      const res = await fetch("http://localhost:5000/api/zonas/mostrarzonas");
-      const data = await res.json();
-      setZonas(data);
-    } catch (error) {
-      console.error("Error al obtener zonas:", error);
-    }
-  };
-
-  // Obtener trabajadores
-  const obtenerTrabajadores = async () => {
-    try {
-      const res = await fetch("http://localhost:5000/api/usuarios/mostrarusuarios");
-      const data = await res.json();
-      setTrabajadores(data);
-    } catch (error) {
-      console.error("Error al obtener trabajadores:", error);
-    }
-  };
-
-  // Obtener materiales existentes
-  const obtenerMateriales = async () => {
-    try {
-      const res = await fetch("http://localhost:5000/api/materiales/mostrarmateriales");
-      const data = await res.json();
-      setMateriales(data);
-    } catch (error) {
-      console.error("Error al obtener materiales:", error);
-    }
-  };
-
-  // Crear solicitud de material existente
-  const crearSolicitudMaterialExistente = async (e) => {
+  // Crear solicitud material existente
+  const solicitarExistente = async (e) => {
     e.preventDefault();
-
-    if (!idMaterial || !cantidad) {
-      alert("Todos los campos son obligatorios");
+    setErrorMensaje(""); // Reiniciar mensaje de error
+    // Validar campos requeridos
+    if (!cantidad || !idZona || !idMaterial) {
+      setErrorMensaje("Por favor, complete todos los campos requeridos.");
       return;
     }
-
-    const nuevaSolicitud = {
-      trabajador_id: user_id, // Añadir el user_id desde localStorage
-      cantidad,
-      id_material: idMaterial,
-    };
-
-    try {
-      console.log("Solicitud de material existente:", nuevaSolicitud);
-      const res = await fetch("http://localhost:5000/api/solicitudes/solicitar-material-existente", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(nuevaSolicitud),
-      });
-
-      if (res.ok) {
-        alert("Solicitud creada exitosamente");
-        setCantidad("");
-        setIdMaterial("");
-        obtenerSolicitudes();
-      } else {
-        const errorData = await res.json();
-        alert(`Error: ${errorData.error}`);
-      }
-    } catch (error) {
-      console.error("Error al crear la solicitud de material existente:", error);
-    }
-  };
-
-  // Crear solicitud de nuevo material
-  const crearSolicitudNuevoMaterial = async (e) => {
-    e.preventDefault();
-
-    if (!nombre || !cantidad || !idZona || !unidadMedida) {
-      alert("Todos los campos son obligatorios");
+    // Validar cantidad positiva
+    if (cantidad <= 0) {
+      setErrorMensaje("La cantidad debe ser mayor a cero.");
       return;
     }
-
-    const nuevaSolicitud = {
-      trabajador_id: user_id, // Añadir el user_id desde localStorage
-      rol_id, // Añadir el rol_id desde localStorage
-      cantidad,
-      nombre,
-      id_zona: idZona,
-      unidad_medida: unidadMedida,
-    };
-
-    try {
-      const res = await fetch("http://localhost:5000/api/solicitudes/solicitar-nuevo-material", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(nuevaSolicitud),
-      });
-
-      if (res.ok) {
-        alert("Solicitud de nuevo material creada exitosamente");
-        setNombre("");
-        setCantidad("");
-        setIdZona("");
-        obtenerSolicitudes();
-        setUnidadMedida("");
-      } else {
-        const errorData = await res.json();
-        alert(`Error: ${errorData.error}`);
-      }
-    } catch (error) {
-      console.error("Error al crear la solicitud de nuevo material:", error);
-    }
+    await fetch("http://localhost:5000/api/solicitudes/crearsolicitud", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        cantidad: Number(cantidad),
+        id_usuario: Number(user_id),
+        id_zona: Number(idZona),
+        id_material: Number(idMaterial),
+        id_estado: 1,
+        es_nuevo: false
+      })
+    });
+    setModalExistente(false);
+    setCantidad("");
+    setIdMaterial("");
+    setIdZona("");
+    fetch("http://localhost:5000/api/solicitudes/mostrarsolicitudes")
+      .then(res => res.json())
+      .then(setSolicitudes);
   };
+
+  // Crear solicitud material nuevo (NO crear material desde el front)
+  const solicitarNuevo = async (e) => {
+    e.preventDefault();
+    setErrorMensaje(""); // Reiniciar mensaje de error
+    // Validar campos requeridos
+    if (!cantidad || !idZona || !nombreMaterial || !idUnidad) {
+      setErrorMensaje("Por favor, complete todos los campos requeridos.");
+      return;
+    }
+    // Validar cantidad positiva
+    if (cantidad <= 0) {
+      setErrorMensaje("La cantidad debe ser mayor a cero.");
+      return;
+    }
+    await fetch("http://localhost:5000/api/solicitudes/crearsolicitud", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        cantidad: Number(cantidad),
+        id_usuario: Number(user_id),
+        id_zona: Number(idZona),
+        id_estado: 1,
+        es_nuevo: true,
+        nombre_material: nombreMaterial,
+        id_unidad: idUnidad
+      })
+    });
+    setModalNuevo(false);
+    setNombreMaterial("");
+    setCantidad("");
+    setIdZona("");
+    setIdUnidad("");
+    fetch("http://localhost:5000/api/solicitudes/mostrarsolicitudes")
+      .then(res => res.json())
+      .then(setSolicitudes);
+  };
+
+  // Listas filtradas según rol
+  let solicitudesExistentes = [];
+  let solicitudesNuevas = [];
+
+  if (rol_id === "2") {
+    solicitudesExistentes = solicitudes.filter(s => !s.es_nuevo);
+    solicitudesNuevas = solicitudes.filter(s => s.es_nuevo);
+  } else if (rol_id === "3" || rol_id === "4") {
+    solicitudesExistentes = solicitudes.filter(
+      s => !s.es_nuevo && String(s.id_usuario) === String(user_id)
+    );
+    solicitudesNuevas = solicitudes.filter(
+      s => s.es_nuevo && String(s.id_usuario) === String(user_id)
+    );
+  }
+
+  // --- ORDENES DE COMPRA ---
+  const fetchOrdenes = () => {
+    fetch("http://localhost:5000/api/orden_compra/listarordenes")
+      .then(res => res.json())
+      .then(setOrdenes);
+  };
+
+  const entregarOrden = async (id_orden, cantidad) => {
+    await fetch(`http://localhost:5000/api/orden_compra/entregarorden/${id_orden}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ cantidad: Number(cantidad) })
+    });
+    fetchOrdenes();
+  };
+
+  const rechazarOrden = async (id_orden) => {
+    await fetch(`http://localhost:5000/api/orden_compra/rechazarorden/${id_orden}`, {
+      method: "PUT"
+    });
+    fetchOrdenes();
+  };
+
+  // Helper para mostrar nombre del material en la tabla de órdenes
+  const getMaterialNombre = (id_material) => {
+    const mat = materiales.find(m => m.id === id_material);
+    return mat ? mat.nombre : id_material ?? "N/A";
+  };
+
+  // Acciones solo para rol 2
+  const accionesRol2 = rol_id === "2"
+    ? { onAsignar: asignarSolicitud, onRechazar: rechazarSolicitud }
+    : null;
 
   return (
     <MenuLateral>
       <div className="contenedor-formulario">
         <h2>Solicitudes de Material</h2>
+        {errorMensaje && (
+          <div style={{
+            background: "#ffdddd",
+            color: "#a94442",
+            border: "1px solid #a94442",
+            padding: "8px 16px",
+            borderRadius: 4,
+            marginBottom: 16,
+            textAlign: "center"
+          }}>
+            {errorMensaje}
+          </div>
+        )}
+        <div style={{ marginBottom: 16 }}>
+          <button onClick={() => setModalExistente(true)}>Solicitar material</button>
+          {(rol_id === "2" || rol_id === "3") && (
+            <button style={{ marginLeft: 8 }} onClick={() => setModalNuevo(true)}>
+              Solicitar nuevo material
+            </button>
+          )}
+          {rol_id === "2" && (
+            <button style={{ marginLeft: 8 }} onClick={() => { fetchOrdenes(); setModalOrdenes(true); }}>
+              Ver órdenes de compra
+            </button>
+          )}
+        </div>
 
-        {/* Formulario para solicitar materiales existentes (rol_id = 4) */}
-        {rol_id === "4" && (
-          <form className="formulario-horizontal" onSubmit={crearSolicitudMaterialExistente}>
-            <div className="fila">
-              <div className="campo">
-                <label>Material:</label>
-                <select value={idMaterial} onChange={(e) => setIdMaterial(e.target.value)}>
-                  <option value="">Seleccione un material</option>
-                  {materiales.map((material) => (
-                    <option key={material.id} value={material.id}>
-                      {material.nombre} ({material.unidad_medida})
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="campo">
-                <label>Cantidad:</label>
-                <input
-                  type="number"
-                  value={cantidad}
-                  onChange={(e) => setCantidad(e.target.value)}
-                  required
-                />
-              </div>
+        {/* Lista de materiales existentes */}
+        <ListaSolicitudes
+          solicitudes={solicitudesExistentes}
+          esNuevo={false}
+          acciones={accionesRol2}
+          materiales={materiales}
+          unidades={unidades}
+        />
+
+        {/* Lista de materiales nuevos */}
+        {rol_id !== "4" && (
+          <ListaSolicitudes
+            solicitudes={solicitudesNuevas}
+            esNuevo={true}
+            acciones={accionesRol2}
+            materiales={materiales}
+            unidades={unidades}
+          />
+        )}
+
+        {/* Modal para solicitar material existente */}
+        <Modal open={modalExistente} onClose={() => setModalExistente(false)}>
+          <form onSubmit={solicitarExistente}>
+            <h3>Solicitar Material Existente</h3>
+            <div>
+              <label>Material:</label>
+              <select value={idMaterial} onChange={e => setIdMaterial(e.target.value)} required>
+                <option value="">Seleccione un material</option>
+                {materiales.map(m => (
+                  <option key={m.id} value={m.id}>{m.nombre}</option>
+                ))}
+              </select>
             </div>
-            <div className="boton-container">
-              <button type="submit" className="btn-crear">Solicitar Material</button>
+            <div>
+              <label>Zona:</label>
+              <select value={idZona} onChange={e => setIdZona(e.target.value)} required>
+                <option value="">Seleccione una zona</option>
+                {zonasFiltradas.map(z => (
+                  <option key={z.id} value={z.id}>{z.nombre}</option>
+                ))}
+              </select>
             </div>
+            <div>
+              <label>Cantidad:</label>
+              <input
+                type="number"
+                min={1}
+                value={cantidad}
+                onChange={e => setCantidad(e.target.value.replace(/[^0-9]/g, ""))}
+                required
+              />
+            </div>
+            <button type="submit">Solicitar</button>
+            {(rol_id === "2" || rol_id === "3") && (
+              <button type="button" style={{ marginLeft: 8 }} onClick={() => { setModalNuevo(true); }}>
+                Solicitar nuevo material
+              </button>
+            )}
+            {errorMensaje && <div className="error-mensaje">{errorMensaje}</div>}
           </form>
-        )}
+        </Modal>
 
-        {/* Formulario para solicitar nuevo material (rol_id = 3) */}
-        {rol_id === "3" && (
-          <form className="formulario-horizontal" onSubmit={crearSolicitudNuevoMaterial}>
-            <div className="fila">
-              <div className="campo">
-                <label>Nombre del Material:</label>
-                <input
-                  type="text"
-                  value={nombre}
-                  onChange={(e) => setNombre(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="campo">
-                <label>Cantidad:</label>
-                <input
-                  type="number"
-                  value={cantidad}
-                  onChange={(e) => setCantidad(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="campo">
-                <label>Unidad de Medida:</label>
-                <select
-                  value={unidadMedida}
-                  onChange={(e) => setUnidadMedida(e.target.value)}
-                  required
-                >
-                  <option value="">Seleccione una unidad</option>
-                  {unidadesMedida.map((unidad, index) => (
-                    <option key={index} value={unidad}>
-                      {unidad}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="campo">
-                <label>Zona:</label>
-                <select value={idZona} onChange={(e) => setIdZona(e.target.value)} required>
-                  <option value="">Seleccione una zona</option>
-                  {zonas.map((zona) => (
-                    <option key={zona.id} value={zona.id}>{zona.nombre}</option>
-                  ))}
-                </select>
-              </div>
+        {/* Modal para solicitar nuevo material */}
+        <Modal open={modalNuevo} onClose={() => setModalNuevo(false)}>
+          <form onSubmit={solicitarNuevo}>
+            <h3>Solicitar Nuevo Material</h3>
+            <div>
+              <label>Nombre:</label>
+              <input
+                type="text"
+                value={nombreMaterial}
+                onChange={e => setNombreMaterial(e.target.value)}
+                required
+              />
             </div>
-            <div className="boton-container">
-              <button type="submit" className="btn-crear">Solicitar Nuevo Material</button>
+            <div>
+              <label>Unidad de medida:</label>
+              <select value={idUnidad} onChange={e => setIdUnidad(e.target.value)} required>
+                <option value="">Seleccione una unidad</option>
+                {unidades.map(u => (
+                  <option key={u.id} value={u.id}>{u.nombre} ({u.abreviatura})</option>
+                ))}
+              </select>
             </div>
+            <div>
+              <label>Zona:</label>
+              <select value={idZona} onChange={e => setIdZona(e.target.value)} required>
+                <option value="">Seleccione una zona</option>
+                {zonas.map(z => (
+                  <option key={z.id} value={z.id}>{z.nombre}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label>Cantidad:</label>
+              <input
+                type="number"
+                min={1}
+                value={cantidad}
+                onChange={e => setCantidad(e.target.value.replace(/[^0-9]/g, ""))}
+                required
+              />
+            </div>
+            <button type="submit">Solicitar</button>
+            {errorMensaje && <div className="error-mensaje">{errorMensaje}</div>}
           </form>
-        )}
+        </Modal>
 
-        {/* Renderizar solicitudes por tipo */}
-        {rol_id === "2" && (
-          <>
-            <TablaSolicitudes
-              titulo="Solicitudes de Materiales Existentes"
-              solicitudes={solicitudes}
-              trabajadores={trabajadores}
-              zonas={zonas}
-              filtro={(s) => s.estado === "Pendiente"}
-            />
-
-            <TablaSolicitudes
-              titulo="Solicitudes de Nuevos Materiales"
-              solicitudes={solicitudes}
-              trabajadores={trabajadores}
-              zonas={zonas}
-              filtro={(s) => s.estado === "Pendiente"}
-            />
-
-            <TablaSolicitudes
-              titulo="Solicitudes Aprobadas Parcialmente"
-              solicitudes={solicitudes}
-              trabajadores={trabajadores}
-              zonas={zonas}
-              filtro={(s) => s.estado === "Aprobado Parcialmente"}
-            />
-          </>
-        )}
+        {/* Modal para mostrar órdenes de compra */}
+        <Modal open={modalOrdenes} onClose={() => setModalOrdenes(false)}>
+          <h3>Órdenes de Compra</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Fecha</th>
+                <th>Material</th>
+                <th>Cantidad</th>
+                <th>¿Material Nuevo?</th>
+                <th>Estado</th>
+                <th>Solicitante</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ordenes.map((o, idx) => (
+                <tr key={o.id_orden}>
+                  <td>{o.id_orden}</td>
+                  <td>{new Date(o.fecha).toLocaleString()}</td>
+                  <td>{getMaterialNombre(o.id_material)}</td>
+                  <td>
+                    <input
+                      type="number"
+                      min={1}
+                      defaultValue={o.cantidad}
+                      style={{ width: 70 }}
+                      onChange={e => ordenes[idx].cantidad = e.target.value}
+                      disabled={o.id_estado !== 1}
+                    />
+                  </td>
+                  <td>{o.es_material_nuevo ? "Sí" : "No"}</td>
+                  <td>
+                    {o.id_estado === 1
+                      ? "Pendiente"
+                      : o.id_estado === 2
+                      ? "Entregado"
+                      : o.id_estado === 3
+                      ? "Rechazado"
+                      : o.id_estado}
+                  </td>
+                  <td>{o.usuario_solicitante}</td>
+                  <td>
+                    {o.id_estado === 1 && (
+                      <>
+                        <button
+                          onClick={() => entregarOrden(o.id_orden, o.cantidad)}
+                          style={{ marginRight: 8 }}
+                        >
+                          Entregado
+                        </button>
+                        <button
+                          onClick={() => rechazarOrden(o.id_orden)}
+                          style={{ color: "red" }}
+                        >
+                          Rechazar
+                        </button>
+                      </>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </Modal>
       </div>
     </MenuLateral>
   );

@@ -27,6 +27,8 @@ function MenuLateral({ children }) {
                 <li><Link to="/zonas">Zonas</Link></li>
                 <li><Link to="/materiales">Materiales</Link></li>
                 <li><Link to="/solicitudes">Solicitudes</Link></li>
+                <li><Link to="/bodega">Bodega</Link></li>
+                <li><Link to="/inventario">Inventario</Link></li>
                 <li><Link to="/asistencia">Asistencia</Link></li>
                 <li><Link to="/tareas">Tareas</Link></li>
                 <li><Link to="/chats">Chats</Link></li>

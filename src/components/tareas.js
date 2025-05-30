@@ -14,19 +14,20 @@ const Tareas = () => {
   const [zonas, setZonas] = useState([]);
   const [tareaEditando, setTareaEditando] = useState(null); 
 
+  const userId = localStorage.getItem("id");
   const rol_id = localStorage.getItem("rol_id");
   useEffect(() => {
   const userId = localStorage.getItem("id");
-  const rolId = localStorage.getItem("rol_id");
+  const rol_id = localStorage.getItem("rol_id");
 
-  // Si es un trabajador (rol_id == 2 por ejemplo), solo trae sus tareas
-  if (rolId === "4") {
+  if (rol_id === "4") {
+    // Solo tareas del usuario logueado
     fetch(`http://localhost:5000/api/tareas/obtenertareas/${userId}`)
       .then((res) => res.json())
       .then(setTareas)
       .catch((err) => console.error("Error al obtener tareas del trabajador:", err));
   } else {
-    // Si es un administrador, trae todas las tareas
+    // Todas las tareas para admin/jefe
     fetch("http://localhost:5000/api/tareas/obtenertareas")
       .then((res) => res.json())
       .then(setTareas)
@@ -105,7 +106,19 @@ const Tareas = () => {
       body: JSON.stringify(nuevaTarea),
     })
       .then((res) => res.json())
-      .then((data) => setMensaje(data.mensaje || data.error))
+      .then((data) => {
+        setMensaje(data.mensaje || data.error);
+        // Vuelve a cargar la lista de tareas
+        if (rol_id === "4") {
+          fetch(`http://localhost:5000/api/tareas/obtenertareas/${userId}`)
+            .then((res) => res.json())
+            .then(setTareas);
+        } else {
+          fetch("http://localhost:5000/api/tareas/obtenertareas")
+            .then((res) => res.json())
+            .then(setTareas);
+        }
+      })
       .catch((error) => console.error("Error al crear tarea:", error));
   };
   const eliminarTarea = (id) => {
@@ -262,11 +275,13 @@ const Tareas = () => {
                 required
               >
                 <option value="">Selecciona un trabajador</option>
-                {trabajadores.map((trabajador) => (
-                  <option key={trabajador.id} value={trabajador.id}>
-                    {trabajador.nombre} {trabajador.apellido}
-                  </option>
-                ))}
+                {trabajadores
+                  .filter((trabajador) => !idZona || String(trabajador.id_zona) === String(idZona))
+                  .map((trabajador) => (
+                    <option key={trabajador.id} value={trabajador.id}>
+                      {trabajador.nombre} {trabajador.apellido}
+                    </option>
+                  ))}
               </select>
             </div>
 

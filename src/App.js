@@ -10,7 +10,8 @@ import Materiales from './components/materiales';
 import Zonas from './components/zonas';
 import Tareas from './components/tareas';
 import Chat from './components/chat';
-
+import Bodega from "./components/bodega";
+import Inventario from "./components/Inventario";
 
 function App() {
   return (
@@ -27,6 +28,8 @@ function App() {
           <Route  path="/tareas" element={<Tareas />} />
           <Route  path="/chats" element={<Chat />} />
           <Route  path="/*" element={<Login />} />
+          <Route path= "/bodega" element={<Bodega />} />
+          <Route path= "/inventario" element={<Inventario />} />
 
         </Routes>
       </Router>
